@@ -7,8 +7,10 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-
-
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import { Link } from "react-router-dom";
 function SearchEngineMain() {
   const [open, setOpen] = useState(false);
   const [ignore, setIgnore] = useState('');
@@ -36,7 +38,18 @@ function SearchEngineMain() {
 
     return (
         <>
-        
+        <AppBar style={{ background: '#1F618D' }} elevation={0}>
+          <Toolbar >
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              <a component={Link} className="home"><img src={require('../images/search-logo.jpg')} style={{height:"50px", paddingTop:"5px"}}/></a>
+            </Typography>
+            <Button component={Link} color="inherit"
+      to="/login"><span style={{fontWeight:"800"}}>登录</span></Button>
+      <Button component={Link} color="inherit"
+      to="/login"><span style={{fontWeight:"800"}}>注册</span></Button>
+          </Toolbar>
+        </AppBar>
+        <div style={{marginTop:"100px"}}></div>
         <div className="space40"></div>
         
         <div className="center">
