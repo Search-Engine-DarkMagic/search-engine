@@ -51,9 +51,9 @@ function SearchEngineMain() {
               <a component={Link} className="home"><img src={require('../images/search-logo.jpg')} style={{height:"50px", paddingTop:"5px"}}/></a>
             </Typography>
             <Button component={Link} color="inherit"
-      to="/login"><span style={{fontWeight:"800"}}>登录</span></Button>
+      to="/v1/login"><span style={{fontWeight:"800"}}>登录</span></Button>
       <Button component={Link} color="inherit"
-      to="/login"><span style={{fontWeight:"800"}}>注册</span></Button>
+      to="/v1/signup"><span style={{fontWeight:"800"}}>注册</span></Button>
           </Toolbar>
         </AppBar>
         <div style={{marginTop:"100px"}}></div>
