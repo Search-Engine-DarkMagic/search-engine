@@ -3,6 +3,10 @@
   
 }
 
+h1 {
+  font-family: Quicksand;
+  font-weight: 800;
+}
 body {
   font-family: Quicksand;
   font-weight: 800;
@@ -44,8 +48,10 @@ body {
 
 .searchBar{
   width: 30%;
-  font-family: Quicksand;
-  font-weight: 800;
+}
+
+.signupBar{
+  width: 15%;
 }
 
 .searchImage {
@@ -54,15 +60,13 @@ body {
 
 
 @media only screen and (max-width: 1000px) {
-  .searchBar{
+  .searchBar, .signupBar {
     width: 50%;
   }
-
-
 }
 
 @media only screen and (max-width: 1200px) {
-  .searchBar{
+  .searchBar , .signupBar{
     width: 40%;
   }
   .searchImage {
@@ -72,9 +76,11 @@ body {
 
 
 @media only screen and (max-width: 600px) {
-  .searchBar{
+  .searchBar, .signupBar {
     width: 60%;
   }
+
+
 }
 
 .center{
@@ -91,4 +97,8 @@ body {
 
 .alignLeft {
   text-align: left;
+}
+
+.errorMessage {
+  color: red;
 }
