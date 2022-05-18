@@ -11,9 +11,16 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { Link } from "react-router-dom";
+import {useNavigate } from 'react-router-dom'
 function SearchEngineMain() {
+  let navigate = useNavigate();
+
   const [open, setOpen] = useState(false);
   const [ignore, setIgnore] = useState('');
+  const [result, setResult] = useState('');
+  const search = () => {
+    navigate('/v1/search/result=' + result + '&filter=' + ignore);
+  }
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -30,7 +37,7 @@ function SearchEngineMain() {
   };
 
   let showIgnore;
-  if (ignore != ''){
+  if (ignore !== ''){
     showIgnore = <span>当前过滤关键字：{ignore}</span>
   }else{
     showIgnore = <span style={{visibility:"hidden"}}>当前过滤关键字：</span>
@@ -89,12 +96,13 @@ function SearchEngineMain() {
         </DialogActions>
       </Dialog>
         <div></div>
-     <TextField className="searchBar" id="outlined-basic" label="搜索" variant="outlined" InputProps={{ style: { fontFamily:"Quicksand", fontWeight:"700"} }} />
+        <form>
+     <TextField className="searchBar" onChange={e => setResult(e.target.value)} id="outlined-basic" label="搜索" variant="outlined" InputProps={{ style: { fontFamily:"Quicksand", fontWeight:"700"} }} />
      &nbsp;&nbsp;&nbsp;
-     
      <div className="space20"></div>
-     <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}}><SearchIcon fontSize="large" className="searchButton"/></Button>
+     <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={search}><SearchIcon fontSize="large" className="searchButton"/></Button>
 
+     </form>
         <div className="space40"></div>
         
         
