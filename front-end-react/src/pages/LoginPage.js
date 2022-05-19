@@ -15,12 +15,10 @@ import BadgeIcon from "@mui/icons-material/Badge";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 
-function LoginPage() {
-
- 
+function LoginPage(props) {
+    
     const [inputEmailError, setInputEmailError] = useState(false);
     const [inputPasswordError, setInputPasswordError] = useState(false);
-
 
     const validate = Yup.object({
    
@@ -29,15 +27,12 @@ function LoginPage() {
         .required('必填'),
 
         password: Yup.string()
-        .min(6, '密码至少要6位')
         .required('必填'),
 
-
-       
     });
 
     let navigate = useNavigate();
-    // navigate('/v1/search/result=' + result + '&filter=' + ignore);
+    
     return (
         <>
         
@@ -67,6 +62,26 @@ function LoginPage() {
 
       onSubmit={(values) => {
         console.log(values);
+        axios({
+          method: 'post',
+          url: 'http://localhost:4000/v1/login',
+          data: values,
+          withCredentials: true,
+      }).then(function (response) {
+        console.log(JSON.stringify(response.data));
+        alert(`登录成功！`);
+        navigate('/');
+        window.location.reload();
+        
+        
+      })
+      .catch(function (error) {
+        if (error.response) {
+          alert(`email 或 密码错误!`)
+        }
+        
+        console.log(error);
+      })
       }}
     >
       {({ values,handleChange, touched, errors }) => (
