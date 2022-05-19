@@ -16,7 +16,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 
 function SignupPage() {
-
+  
     const [inputNickNameError, setInputNickNameError] = useState(false);
     const [inputEmailError, setInputEmailError] = useState(false);
     const [inputPasswordError, setInputPasswordError] = useState(false);
@@ -42,7 +42,8 @@ function SignupPage() {
     });
 
     let navigate = useNavigate();
-    console.log(inputConfirmPasswordError)
+    
+    
     // navigate('/v1/search/result=' + result + '&filter=' + ignore);
     return (
         <>
@@ -75,6 +76,22 @@ function SignupPage() {
 
       onSubmit={(values) => {
         console.log(values);
+        axios({
+          method: 'post',
+          url: 'http://localhost:4000/v1/signup',
+          data: values,
+      }).then(function (response) {
+        console.log(JSON.stringify(response.data));
+        alert(`注册成功！请登录！`)
+        navigate('/v1/login');
+      })
+      .catch(function (error) {
+        if (error.response) {
+          alert(`email地址已经被注册！`)
+        }
+        
+        console.log(error);
+      })
       }}
     >
       {({ values,handleChange, touched, errors }) => (
@@ -204,7 +221,7 @@ function SignupPage() {
 
         <div className="space20"></div>
         <a component={Link} href={"/v1/login"}><p style={{fontSize:"12px"}}>已有账户？请登录</p></a>
-            <Button variant="contained" size="large" type="submit">注册</Button>
+            <Button variant="contained" size="large" type="submit" >注册</Button>
     
         </Form>
       )}

@@ -11,8 +11,43 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { Link } from "react-router-dom";
-import {useNavigate } from 'react-router-dom'
-function SearchEngineMain() {
+import {useNavigate } from 'react-router-dom';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import axios from "axios";
+function SearchEngineMain(props) {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open2 = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose2 = () => {
+    setAnchorEl(null);
+
+    axios({
+      method: 'post',
+      url: 'http://localhost:4000/v1/logout',
+      withCredentials: true,
+  }).then(function (response) {
+    console.log(JSON.stringify(response.data));
+    window.location.reload(false);
+    navigate('/');
+    
+  })
+  .catch(function (error) {
+    if (error.response) {
+      console.log(error);
+    }
+    
+  })
+  };
+  const [age, setAge] = React.useState('');
+
+  const handleChange = (event) => {
+    setAge(event.target.value);
+  };
+
   let navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
@@ -43,6 +78,46 @@ function SearchEngineMain() {
     showIgnore = <span style={{visibility:"hidden"}}>当前过滤关键字：</span>
   }
 
+  let showUser;
+
+  let showLogin;
+  let showSignup;
+  if (props.nickName !== ''){
+    showUser = <><Button
+    id="basic-button"
+    aria-controls={open2 ? 'basic-menu' : undefined}
+    aria-haspopup="true"
+    aria-expanded={open2 ? 'true' : undefined}
+    onClick={handleClick}
+  >
+    <AccountCircleIcon style={{color:"white"}} ></AccountCircleIcon> &nbsp;
+   <span style={{color:"white", fontFamily: "Quicksand",
+  fontWeight: "800"}}>{props.nickName}</span> 
+  </Button>
+  <Menu
+    id="basic-menu"
+    anchorEl={anchorEl}
+    open={open2}
+    onClose={handleClose2}
+    MenuListProps={{
+      'aria-labelledby': 'basic-button',
+    }}
+  >
+    <MenuItem onClick={handleClose2}><span>个人信息</span></MenuItem>
+    <MenuItem onClick={handleClose2}><span>历史搜索记录</span></MenuItem>
+    <MenuItem onClick={handleClose2}><span>退出登录</span></MenuItem>
+  </Menu></>
+    
+    // <Button component={Link} color="inherit"
+    // to="/v1/login"><span style={{fontWeight:"800"}}>{props.nickName}</span></Button>
+
+    
+  }else{
+    showLogin = <Button component={Link} color="inherit"
+    to="/v1/login"><span style={{fontWeight:"800"}}>登录</span></Button>
+    showSignup = <Button component={Link} color="inherit"
+    to="/v1/signup"><span style={{fontWeight:"800"}}>注册</span></Button>
+  }
     return (
         <>
         <AppBar style={{ background: '#1F618D' }} elevation={0}>
@@ -50,10 +125,12 @@ function SearchEngineMain() {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               <a component={Link} className="home"><img src={require('../images/search-logo.jpg')} style={{height:"50px", paddingTop:"5px"}}/></a>
             </Typography>
-            <Button component={Link} color="inherit"
-      to="/v1/login"><span style={{fontWeight:"800"}}>登录</span></Button>
-      <Button component={Link} color="inherit"
-      to="/v1/signup"><span style={{fontWeight:"800"}}>注册</span></Button>
+            {showUser}
+            {showLogin}
+            {showSignup}
+
+      
+      
           </Toolbar>
         </AppBar>
         <div style={{marginTop:"100px"}}></div>
