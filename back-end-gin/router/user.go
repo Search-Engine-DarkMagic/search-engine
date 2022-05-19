@@ -15,6 +15,7 @@ import (
 )
 
 var i string = "\"\""
+var U string
 
 const SecretKey = "secret"
 
@@ -151,4 +152,27 @@ func logout(c *gin.Context) {
 
 	c.SetCookie("token", "", -1000, "/", "localhost", false, true)
 	log.Println(i)
+}
+
+//user history
+func history(c *gin.Context) {
+	dsn := "root:888888@tcp(34.66.167.238:3306)/histories?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("can't connect to database")
+	}
+	var userEmail model.UserEmail
+	err2 := c.ShouldBindJSON(&userEmail)
+
+	if err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Not found!"})
+		return
+	}
+
+	var matchingUser []model.History
+	db.Where("email = ?", userEmail.Email).Find(&matchingUser)
+
+	fmt.Println("jb", matchingUser)
+	c.JSON(http.StatusOK, gin.H{"data": matchingUser})
+
 }

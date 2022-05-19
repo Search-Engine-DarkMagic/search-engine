@@ -22,7 +22,11 @@ function SearchEngineMain(props) {
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose2 = () => {
+    setAnchorEl(null);
+  }
+  const logout = () => {
     setAnchorEl(null);
 
     axios({
@@ -41,11 +45,8 @@ function SearchEngineMain(props) {
     }
     
   })
-  };
-  const [age, setAge] = React.useState('');
 
-  const handleChange = (event) => {
-    setAge(event.target.value);
+  
   };
 
   let navigate = useNavigate();
@@ -79,7 +80,6 @@ function SearchEngineMain(props) {
   }
 
   let showUser;
-
   let showLogin;
   let showSignup;
   if (props.nickName !== ''){
@@ -105,13 +105,13 @@ function SearchEngineMain(props) {
   >
     <MenuItem onClick={handleClose2}><span>个人信息</span></MenuItem>
     <MenuItem onClick={handleClose2}><span>历史搜索记录</span></MenuItem>
-    <MenuItem onClick={handleClose2}><span>退出登录</span></MenuItem>
+    <MenuItem onClick={logout}><span>退出登录</span></MenuItem>
   </Menu></>
     
     // <Button component={Link} color="inherit"
     // to="/v1/login"><span style={{fontWeight:"800"}}>{props.nickName}</span></Button>
 
-    
+
   }else{
     showLogin = <Button component={Link} color="inherit"
     to="/v1/login"><span style={{fontWeight:"800"}}>登录</span></Button>

@@ -5,12 +5,13 @@ import SearchEngineMain from "./pages/SearchEngineMain";
 import SearchResult from "./pages/SearchResult";
 import SignupPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
+import History from "./pages/History";
 import axios from 'axios';
 
 function App() {
   
   const [nickName, setNickName] = useState("");
-
+  const [email, setEmail] = useState("");
   useEffect(() => {
     axios({
       method: 'get',
@@ -18,7 +19,9 @@ function App() {
       withCredentials: true,
   }).then(function (response) {
     setNickName(response.data.message.nickName);
-
+    
+    setEmail(response.data.message.email);
+    
   })
   .catch(function (error) {
     if (error.response) {
@@ -33,9 +36,10 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<SearchEngineMain nickName={nickName} setNickName={setNickName}/>} />
-        <Route path="/v1/search/:keyword&:filter" element={<SearchResult />} />
+        <Route path="/v1/search/:keyword&:filter" element={<SearchResult nickName={nickName} email={email}/>} />
         <Route path="/v1/signup" element={<SignupPage />} />
         <Route path="/v1/login" element={<LoginPage setNickName={setNickName} nickName={nickName}/>} />
+        <Route path="/v1/history" element={<History />} />
       </Routes>
     </Router>
   );

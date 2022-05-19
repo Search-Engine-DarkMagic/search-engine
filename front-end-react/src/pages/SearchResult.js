@@ -14,11 +14,85 @@ import { Link } from "react-router-dom";
 import {useNavigate } from 'react-router-dom';
 import axios from "axios";
 import {useParams} from 'react-router-dom';
-function SearchResult() {
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+
+function SearchResult(props) {
+  const [email, setEmail] = useState('');
+  useEffect(() => {
+    
+    setResult(params.keyword.slice(7));
+    setIgnore(params.filter.slice(7));
+
+      axios({
+        method: 'get',
+        url: 'http://localhost:4000/v1/userinfo',
+        withCredentials: true,
+    }).then(function (response) {
+      setEmail(response.data.message.email);
+      console.log(response.data.message.email);
+      console.log(email);
+    })
+    .catch(function (error) {
+      if (error.response) {
+        console.log(error);
+      }
+  
+    })
+
+    setTimeout(() => axios({
+      method: 'post',
+      url: 'http://localhost:4000/v1/search?result=' + params.keyword.slice(7) + '&filter=' + params.filter.slice(7),
+      withCredentials: true,
+   data: {
+     email: email,
+   }
+  }).then(function (response) {
+   console.log(response);
+   console.log(email);
+  })
+  .catch(function (error) {
+    console.log(error);
+  }), 1000);
+     
+     
+ }, [email]);
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open2 = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose2 = () => {
+    setAnchorEl(null);
+  }
+  const logout = () => {
+    setAnchorEl(null);
+
+    axios({
+      method: 'post',
+      url: 'http://localhost:4000/v1/logout',
+      withCredentials: true,
+  }).then(function (response) {
+    console.log(JSON.stringify(response.data));
+    window.location.reload(false);
+    navigate('/');
+    
+  })
+  .catch(function (error) {
+    if (error.response) {
+      console.log(error);
+    }
+    
+  })
+  };
+
     let navigate = useNavigate();
     const [open, setOpen] = useState(false);
-  const [ignore, setIgnore] = useState('');
-  const [result, setResult] = useState('');
+    const [ignore, setIgnore] = useState('');
+    const [result, setResult] = useState('');
     const params = useParams();
     const handleClickOpen = () => {
         setOpen(true);
@@ -46,20 +120,47 @@ function SearchResult() {
     showIgnore = <span style={{visibility:"hidden"}}>当前过滤关键字：</span>
   }
 
-    useEffect(() => {
-       setResult(params.keyword.slice(7));
-       setIgnore(params.filter.slice(7));
-        axios({
-            method: 'post',
-            url: 'http://localhost:4000/v1/search?result=' + params.keyword.slice(7) + '&filter=' + params.filter.slice(7),
-        }).then(function (response) {
-          console.log(JSON.stringify(response.data));
-        })
-        .catch(function (error) {
-          console.log(error);
-        })
-        
-    }, []);
+
+
+    let showUser;
+  let showLogin;
+  let showSignup;
+  if (props.nickName !== ''){
+    showUser = <><Button
+    id="basic-button"
+    aria-controls={open2 ? 'basic-menu' : undefined}
+    aria-haspopup="true"
+    aria-expanded={open2 ? 'true' : undefined}
+    onClick={handleClick}
+  >
+    <AccountCircleIcon style={{color:"white"}} ></AccountCircleIcon> &nbsp;
+   <span style={{color:"white", fontFamily: "Quicksand",
+  fontWeight: "800"}}>{props.nickName}</span> 
+  </Button>
+  <Menu
+    id="basic-menu"
+    anchorEl={anchorEl}
+    open={open2}
+    onClose={handleClose2}
+    MenuListProps={{
+      'aria-labelledby': 'basic-button',
+    }}
+  >
+    <MenuItem onClick={handleClose2}><span>个人信息</span></MenuItem>
+    <MenuItem onClick={handleClose2}><span>历史搜索记录</span></MenuItem>
+    <MenuItem onClick={logout}><span>退出登录</span></MenuItem>
+  </Menu></>
+    
+    // <Button component={Link} color="inherit"
+    // to="/v1/login"><span style={{fontWeight:"800"}}>{props.nickName}</span></Button>
+
+
+  }else{
+    showLogin = <Button component={Link} color="inherit"
+    to="/v1/login"><span style={{fontWeight:"800"}}>登录</span></Button>
+    showSignup = <Button component={Link} color="inherit"
+    to="/v1/signup"><span style={{fontWeight:"800"}}>注册</span></Button>
+  }
 
     return (
         <>
@@ -68,10 +169,10 @@ function SearchResult() {
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
               <a component={Link} href={"/"} className="home"><img src={require('../images/search-logo.jpg')} style={{height:"50px", paddingTop:"5px"}}/></a>
             </Typography>
-            <Button component={Link} color="inherit"
-      to="/login"><span style={{fontWeight:"800"}}>登录</span></Button>
-      <Button component={Link} color="inherit"
-      to="/login"><span style={{fontWeight:"800"}}>注册</span></Button>
+            {showUser}
+            {showLogin}
+            {showSignup}
+
           </Toolbar>
         </AppBar>
         <div style={{marginTop:"100px"}}></div>
