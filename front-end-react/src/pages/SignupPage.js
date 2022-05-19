@@ -15,7 +15,7 @@ import BadgeIcon from "@mui/icons-material/Badge";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 
-function SignupPage() {
+function SignupPage(props) {
   
     const [inputNickNameError, setInputNickNameError] = useState(false);
     const [inputEmailError, setInputEmailError] = useState(false);

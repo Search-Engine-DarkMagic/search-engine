@@ -16,6 +16,7 @@ func RunServer() {
 	r.POST("/v1/login", userLogin)
 	r.GET("/v1/userinfo", userInfo)
 	r.POST("/v1/logout", logout)
+	r.POST("/v1/history", history)
 	fmt.Println("Server is running on port 4000...")
 	r.Run(":4000")
 }
