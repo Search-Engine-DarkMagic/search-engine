@@ -20,6 +20,10 @@ func RunServer() {
 	r.POST("/v1/favFolder", favFolderCreate)
 	r.POST("/v1/favFolderRetrieve", favFolderList)
 	r.GET("/v1/favResult", favResultAdd)
+	r.POST("/v1/addFav", addFav)
+	r.POST("/v1/deleteFav", deleteFav)
+	r.POST("/v1/deleteFavFolder", deleteFavFolder)
+	r.POST("/v1/renameFolder", renameFolder)
 	fmt.Println("Server is running on port 4000...")
 	r.Run(":4000")
 }

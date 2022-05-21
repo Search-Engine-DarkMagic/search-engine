@@ -22,3 +22,9 @@ type Fav struct {
 	Folder string `json:"folder"`
 	Result string `json:"result"`
 }
+
+type RenameFolder struct {
+	Email     string `json:"email"`
+	OldFolder string `json:"oldFolder"`
+	NewFolder string `json:"newFolder"`
+}
