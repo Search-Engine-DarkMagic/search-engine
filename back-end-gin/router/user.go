@@ -260,7 +260,7 @@ func favFolderList(c *gin.Context) {
 
 }
 
-//user cadd favorite result
+//user add favorite result
 func favResultAdd(c *gin.Context) {
 	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -274,4 +274,62 @@ func favResultAdd(c *gin.Context) {
 		Result: "美食1号",
 	}
 	db.Create(&favFolder)
+}
+
+func addFav(c *gin.Context) {
+	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("can't connect to database")
+	}
+
+	var test model.Fav
+
+	c.BindJSON(&test)
+
+	db.Create(&test)
+}
+
+func deleteFav(c *gin.Context) {
+	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("can't connect to database")
+	}
+
+	var test model.Fav
+
+	c.BindJSON(&test)
+
+	db.Where("email = ? AND folder = ? AND result = ?", test.Email, test.Folder, test.Result).Delete(&test)
+
+}
+
+func deleteFavFolder(c *gin.Context) {
+	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("can't connect to database")
+	}
+
+	var test model.Fav
+
+	c.BindJSON(&test)
+
+	db.Where("email = ? AND folder = ?", test.Email, test.Folder).Delete(&test)
+}
+
+func renameFolder(c *gin.Context) {
+	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("can't connect to database")
+	}
+
+	var test model.RenameFolder
+	var test2 model.Fav
+	c.BindJSON(&test)
+	fmt.Println("please1111111")
+	fmt.Println(test.NewFolder)
+	db.Model(&test2).Where("email = ? AND folder = ?", test.Email, test.OldFolder).Update("folder", test.NewFolder)
 }
