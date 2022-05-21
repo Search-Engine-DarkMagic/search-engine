@@ -17,14 +17,44 @@ import {useParams} from 'react-router-dom';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import { styled } from '@mui/material/styles';
+import Box from '@mui/material/Box';
+import { ErrorMessage, Formik, Field, Form, useFormik } from 'formik';
+import Grid from '@mui/material/Grid';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+function Fav(props) {
 
-function SearchResult(props) {
-  const [email, setEmail] = useState('');
-  useEffect(() => {
+    const [favList, setFavList] = useState([]);
+    const [option, setOption] = useState("");
+    const Item = styled(Paper)(({ theme }) => ({
+        backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+        ...theme.typography.body2,
+        padding: theme.spacing(1),
+        textAlign: 'center',
+        boxShadow:'none'
+      }));
     
-    setResult(params.keyword.slice(7));
-    setIgnore(params.filter.slice(7));
 
+      const Item2 = styled(Paper)(({ theme }) => ({
+        backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+        ...theme.typography.body2,
+        padding: theme.spacing(1),
+       
+        boxShadow:'none'
+      }));
+
+
+  const [email, setEmail] = useState('');
+  const [dataValue, setDataValue] = useState([]);
+  const [results, setResults] = useState([]);
+  useEffect(() => {
       axios({
         method: 'get',
         url: 'http://localhost:4000/v1/userinfo',
@@ -43,16 +73,20 @@ function SearchResult(props) {
 
     setTimeout(() => axios({
       method: 'post',
-      url: 'http://localhost:4000/v1/search?result=' + params.keyword.slice(7) + '&filter=' + params.filter.slice(7),
+      url: 'http://localhost:4000/v1/favFolderRetrieve',
       withCredentials: true,
    data: {
      email: email,
    }
   }).then(function (response) {
-   console.log(response);
-   console.log(email);
+  
+   console.log(response.data.message);
+   setDataValue(response.data.message);
+   console.log(dataValue);
+
   })
   .catch(function (error) {
+
     console.log(error);
   }), 1000);
      
@@ -75,6 +109,7 @@ function SearchResult(props) {
       method: 'post',
       url: 'http://localhost:4000/v1/logout',
       withCredentials: true,
+      
   }).then(function (response) {
     console.log(JSON.stringify(response.data));
     window.location.reload(false);
@@ -88,7 +123,7 @@ function SearchResult(props) {
     
   })
   };
-
+   
     let navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const [ignore, setIgnore] = useState('');
@@ -120,13 +155,58 @@ function SearchResult(props) {
     showIgnore = <span style={{visibility:"hidden"}}>当前过滤关键字：</span>
   }
 
-
-
-    let showUser;
+  
+  let test;
+  let showFolder;
+  let showContent;
+  let showUser;
   let showLogin;
   let showSignup;
+
+  //Eliminate duplicate folder name by using 'Set'
+  const mySet1 = new Set()
+
+  //Add all folder names into Set
+  for (let i = 0; i < Object.keys(dataValue).length; i++) {
+    mySet1.add(dataValue[i].folder);
+  }
+
+  //Convert Set to array
+  const arr = Array.from(mySet1);
+
+  //Print all folders
+  test = arr.map((row) => (
+    <Item><Button onClick={() => setOption(row)} disableRipple style={{background:"transparent", padding:"0px", margin:"0px"}}><h3>{row}<span> {">"} </span></h3></Button></Item>
+  ))
+
+
+  if (Object.keys(dataValue).length === 0){
+    showFolder = <h3>空</h3>
+  }else{
+    showFolder = dataValue.map((row) => (
+      <>
+<Box sx={{ flexGrow: 1 }}>
+      <Grid container spacing={2}>
+        <Grid item xs={11}>
+          <Item><Button onClick={() => setOption(row.folder)} disableRipple style={{background:"transparent", padding:"0px", margin:"0px"}}><h3>{row.folder}<span> {">"} </span></h3></Button></Item>
+        </Grid>
+      </Grid>
+    </Box>
+      </>
+    ))
+  }
+
+  
+ showContent = dataValue.filter(val => val.folder == option).map((row) => (
+  <Item><span>{row.result}</span></Item>
+ ))
+
+
   if (props.nickName !== ''){
-    showUser = <><Button
+    showUser = <>
+        <Button component={Link} color="inherit"
+    to="/"><span style={{fontWeight:"800"}}>返回搜索</span></Button>
+    <Button
     id="basic-button"
     aria-controls={open2 ? 'basic-menu' : undefined}
     aria-haspopup="true"
@@ -147,13 +227,12 @@ function SearchResult(props) {
     }}
   >
     <MenuItem onClick={handleClose2}><span>个人信息</span></MenuItem>
-    <MenuItem onClick={handleClose2} component={Link} to="/v1/history"><span>历史搜索记录</span></MenuItem>
+    <MenuItem onClick={handleClose2}><span>历史搜索记录</span></MenuItem>
     <MenuItem onClick={logout}><span>退出登录</span></MenuItem>
   </Menu></>
     
     // <Button component={Link} color="inherit"
     // to="/v1/login"><span style={{fontWeight:"800"}}>{props.nickName}</span></Button>
-
 
   }else{
     showLogin = <Button component={Link} color="inherit"
@@ -181,48 +260,59 @@ function SearchResult(props) {
         <div></div>
         {showIgnore}
         <div></div>
-        <Button style={{minWidth: '50px', minHeight: '55px'}} onClick={handleClickOpen}>高级搜索</Button>
-        <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>高级搜索设置:</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            过滤关键词
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="keyword"
-            type="keyword"
-            fullWidth
-            variant="standard"
-            name="ignore"
-            value={ignore}
-            onChange={e => setIgnore(e.target.value)}
-            InputProps={{ style: { fontFamily:"Quicksand", fontWeight:"700"} }}
-          />
-          <div className="space40"><span style={{fontSize:"15px"}}>*过滤关键词：输入的关键词将不会出现在搜索结果中</span></div>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>确定</Button>
-          <Button onClick={handleCloseNull}>取消</Button>
-          
-        </DialogActions>
-      </Dialog>
-        <div></div>
-        <form>
-     <TextField className="searchBar" value={result} onChange={e => setResult(e.target.value)} id="outlined-basic" label="搜索" variant="outlined" InputProps={{ style: { fontFamily:"Quicksand", fontWeight:"700"} }} />
-     &nbsp;&nbsp;&nbsp;
-  
-     <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={search}><SearchIcon fontSize="large" className="searchButton"/></Button>
-    <div style={{marginBottom:"100px"}}></div>
-     </form>
-       
-      <h1>搜索结果如下:</h1>
-        <hr style={{width:"50%"}}></hr>
-     </div>
         
+        <Box sx={{ flexGrow: 1 }}>
+      <Grid container spacing={2}>
+        <Grid item xs={6}>
+          <Item><h1>{props.nickName}的收藏夹:</h1></Item>
+        </Grid>
+      
+        
+      </Grid>
+    </Box>
+        
+     </div>
+        <div className="space40"></div>
+        <div className="space40"></div>
+        <div>
+
+        <Box sx={{ flexGrow: 1 }}>
+      <Grid container spacing={1}>
+      <Grid item xs={1}>
+          <Item></Item>
+        </Grid>
+        <Grid item xs={4}>
+          <Item><h2>收藏夹列表</h2><hr></hr></Item>
+        </Grid>
+        <Grid item xs={1}>
+          <Item></Item>
+        </Grid>
+        <Grid item xs={4}>
+          <Item><h2>收藏夹内容</h2><hr></hr></Item>
+        </Grid>
+    </Grid>
+    <Grid container spacing={1}>
+      <Grid item xs={1}>
+          <Item></Item>
+        </Grid>
+        <Grid item xs={4}>
+          <Item><h3>{test}</h3></Item>
+
+        </Grid>
+        <Grid item xs={1}>
+          <Item></Item>
+        </Grid>
+        <Grid item xs={4}>
+          
+          <Item2><span>{showContent}</span></Item2>
+        </Grid>
+    </Grid>
+    
+    </Box>
+
+        </div>
      </>
     )
 }
 
-export default SearchResult;
+export default Fav;

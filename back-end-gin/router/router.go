@@ -17,6 +17,9 @@ func RunServer() {
 	r.GET("/v1/userinfo", userInfo)
 	r.POST("/v1/logout", logout)
 	r.POST("/v1/history", history)
+	r.POST("/v1/favFolder", favFolderCreate)
+	r.POST("/v1/favFolderRetrieve", favFolderList)
+	r.GET("/v1/favResult", favResultAdd)
 	fmt.Println("Server is running on port 4000...")
 	r.Run(":4000")
 }
