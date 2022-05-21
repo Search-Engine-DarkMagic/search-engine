@@ -6,6 +6,7 @@ import SearchResult from "./pages/SearchResult";
 import SignupPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
 import History from "./pages/History";
+import Fav from "./pages/Fav";
 import axios from 'axios';
 
 function App() {
@@ -35,11 +36,12 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<SearchEngineMain nickName={nickName} setNickName={setNickName}/>} />
+        <Route path="/" element={<SearchEngineMain nickName={nickName} setNickName={setNickName} email={email} />} />
         <Route path="/v1/search/:keyword&:filter" element={<SearchResult nickName={nickName} email={email}/>} />
         <Route path="/v1/signup" element={<SignupPage />} />
         <Route path="/v1/login" element={<LoginPage setNickName={setNickName} nickName={nickName}/>} />
-        <Route path="/v1/history" element={<History />} />
+        <Route path="/v1/history" element={<History nickName={nickName}/>} />
+        <Route path="/v1/fav" element={<Fav nickName={nickName} email={email}/>} />
       </Routes>
     </Router>
   );

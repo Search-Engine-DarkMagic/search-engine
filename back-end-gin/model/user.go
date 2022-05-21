@@ -16,3 +16,9 @@ type History struct {
 	Filter   string `json:"filter"`
 	CreateAt string `json:"time"`
 }
+
+type Fav struct {
+	Email  string `json:"email"`
+	Folder string `json:"folder"`
+	Result string `json:"result"`
+}

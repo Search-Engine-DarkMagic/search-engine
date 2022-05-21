@@ -176,3 +176,102 @@ func history(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": matchingUser})
 
 }
+
+//user favorites
+func favorite(c *gin.Context) {
+	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("can't connect to database")
+	}
+
+	db.AutoMigrate(&model.Fav{})
+
+	var fav model.Fav
+	err2 := c.ShouldBindJSON(&fav)
+
+	if err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Not found!"})
+		return
+	}
+
+	db.Create(&fav)
+	c.JSON(http.StatusOK, gin.H{"data": fav})
+
+}
+
+//user create favorite folder
+func favFolderCreate(c *gin.Context) {
+	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("can't connect to database")
+	}
+
+	db.AutoMigrate(&model.Fav{})
+
+	var fav model.Fav
+	err2 := c.ShouldBindJSON(&fav)
+
+	if err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Not found!"})
+		return
+	}
+
+	favFolder := model.Fav{
+		Email:  fav.Email,
+		Folder: fav.Folder,
+		Result: "empty",
+	}
+
+	var checkDup model.Fav
+	db.Where("email = ? AND folder = ?", fav.Email, fav.Folder).Find(&checkDup)
+
+	if len(checkDup.Email) != 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "folder already existed!"})
+	} else {
+		db.Create(&favFolder)
+		c.JSON(http.StatusOK, gin.H{"message": "success!"})
+	}
+
+}
+
+//user list favorite folder
+func favFolderList(c *gin.Context) {
+	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("can't connect to database")
+	}
+
+	var userEmail model.UserEmail
+
+	err2 := c.ShouldBindJSON(&userEmail)
+	fmt.Println("email is ", userEmail.Email)
+	if err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Not found!"})
+		return
+	}
+
+	fmt.Println(userEmail.Email)
+	var favFolder []model.Fav
+	db.Where("email = ?", userEmail.Email).Find(&favFolder)
+	c.JSON(http.StatusOK, gin.H{"message": favFolder})
+
+}
+
+//user cadd favorite result
+func favResultAdd(c *gin.Context) {
+	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("can't connect to database")
+	}
+
+	favFolder := model.Fav{
+		Email:  "mayichong123@gmail.com",
+		Folder: "美食",
+		Result: "美食1号",
+	}
+	db.Create(&favFolder)
+}

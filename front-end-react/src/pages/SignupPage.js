@@ -227,7 +227,6 @@ function SignupPage(props) {
       )}
     </Formik>
 
-
      </div>
         
      </>
