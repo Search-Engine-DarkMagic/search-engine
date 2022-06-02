@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//服务器api路径 （具体请参考github readme）
 func RunServer() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
@@ -28,7 +29,7 @@ func RunServer() {
 	r.Run(":4000")
 }
 
-//CORS error fix
+//修复CORS错误（CORS当本地同时运行服务器+客户端会报错）
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")

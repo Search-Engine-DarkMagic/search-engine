@@ -16,22 +16,28 @@ import (
 	"github.com/yanyiwu/gojieba"
 )
 
+//main包开始
 func main() {
+	//创建一个slice叫words，把分词结果存入words中
 	var words []string
+	//jieba分词
 	use_hmm := true
 	x := gojieba.NewJieba()
 	defer x.Free()
-	// treeOP.TreeOperation()
+	// treeOP.TreeOperation() B树(还在考虑怎么用,请无视)
 
+	//如果此文件夹下存在Book1 excel文件，那么就不用启动分词 (index.go)；如果不存在，自动分词
 	if _, err := os.Stat("Book1.xlsx"); errors.Is(err, os.ErrNotExist) {
 		index.Index()
 	}
 
+	//打开Book1 excel文件
 	f, err := excelize.OpenFile("Book1.xlsx")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	//延迟关闭
 	defer func() {
 		// Close the spreadsheet.
 		if err := f.Close(); err != nil {
@@ -39,25 +45,31 @@ func main() {
 		}
 	}()
 
+	/*
+		创建4个map：
+			m为排序: 数字ID对应搜索结果 (ex. ID: 1 -> 搜索结果:美沃可视数码裂隙灯)
+			contextClue: 拼音目录: 首单词拼音对应排序位置 （ex. 字母: a -> 搜索结果排序: 100-500)
+			searchResultRelated: 关联度搜索: 最相关的会在搜索结果最前面
+			otherRelatedKey: 相关搜索: 跟搜索关键词最接近的几个词语
+
+	*/
 	m := make(map[string]string)
 	contextClue := make(map[string]string)
 	searchResultRelated := make(map[string]int)
 	otherRelatedKey := make(map[string]int)
+
+	//读取excel行和列的数字
 	location1 := "A"
 	location2 := "B"
-	// location3 := "C"
-	// location4 := "D"
 
 	count1 := 1
 	count2 := 1
-	// count3 := 1
-	// count4 := 1
 	count5 := 1
 	count6 := 1
 	location5 := "E"
 	location6 := "F"
 
-	//M
+	//读取m数据
 	for {
 		location1 += strconv.Itoa(count1)
 		location2 += strconv.Itoa(count2)
@@ -81,7 +93,7 @@ func main() {
 
 	}
 
-	//Context
+	//读取拼音索引 contextClue
 	for {
 		location5 += strconv.Itoa(count5)
 		location6 += strconv.Itoa(count6)
@@ -101,41 +113,57 @@ func main() {
 		}
 	}
 
+	//搜索关键词
 	result := "amazon"
+
+	//中英文一起搜索，用count来计数
 	searchENandCN := 0
 	for {
 
+		//regex检测搜索结果是否是中文
 		match, _ := regexp.MatchString("[\u4e00-\u9fa5]", result)
+		//如果是：
 		if match {
+			//变成拼音
 			a := pinyin.NewArgs()
 			b := pinyin.Pinyin(result, a)
+			//找到拼音首字母
 			value := b[0][0][0:1]
 
 			s := strings.Split(contextClue[value], " ")
+			//找到拼音开始+结束点，节约搜索时间
 			starting, _ := strconv.Atoi(s[0])
 			ending, _ := strconv.Atoi(s[1])
 
 			locationLimit := "C"
 			locationLimit2 := "D"
 
+			//开始+结束点
 			for i := starting; i < ending; i++ {
 
+				//每行++
 				locationLimit2 += strconv.Itoa(i)
 
 				locationLimit += strconv.Itoa(i)
 
+				//读取搜索结果
 				cell1, _ := f.GetCellValue("Sheet1", locationLimit)
 
+				//检测搜索关键词是否出现在搜索结果中
 				if result == cell1[strings.Index(cell1, " ")+1:] {
 
 					finalResult, _ := f.GetCellValue("Sheet1", locationLimit2)
+					//因为每个结果前面都有拼音分词，所以去掉拼音，只读分词
 					s := strings.Split(finalResult, " ")
 
 					for value := range s {
+						//把搜索结果放到map里面
 						searchResultRelated[m[s[value]]] = strings.Index(m[s[value]], result)
 
+						//继续分词，为了相关度搜索
 						words = x.Cut(m[s[value]], use_hmm)
 
+						//把分好的词放OtherRelatedKey里面
 						for _, value := range words {
 							match, _ := regexp.MatchString("[\u4e00-\u9fa5a-zA-Z]", value)
 							if match && value != result {
@@ -150,12 +178,16 @@ func main() {
 				locationLimit = "C"
 				locationLimit2 = "D"
 			}
+			//搜完中文，用翻译包翻译成英文继续搜索
 			result, _ = gt.Translate(result, "zh-Hans", "en")
+
 			searchENandCN++
 
 		} else {
+
+			//检测结果如果是英文：（大致流程同上）
+
 			value := result[0:1]
-			// fmt.Println(contextClue[value])
 
 			s := strings.Split(contextClue[value], " ")
 			starting, _ := strconv.Atoi(s[0])
@@ -204,6 +236,7 @@ func main() {
 			searchENandCN++
 		}
 
+		//如果搜完两遍，跳出loop
 		if searchENandCN == 2 {
 			break
 		}
@@ -211,7 +244,8 @@ func main() {
 	}
 
 	fmt.Println(searchResultRelated)
-	//关联度排序
+	//关联度排序排序（关键词出现在搜索结果的位置，数字越小越提前）
+
 	keys := make([]string, 0, len(searchResultRelated))
 
 	for key := range searchResultRelated {
@@ -225,7 +259,7 @@ func main() {
 		fmt.Println(k, searchResultRelated[k])
 	}
 
-	//相关搜索
+	//相关搜索（词出现频率最高）
 	keys2 := make([]string, 0, len(otherRelatedKey))
 
 	for keyy := range otherRelatedKey {
