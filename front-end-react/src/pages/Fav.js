@@ -29,10 +29,16 @@ import Box from '@mui/material/Box';
 import { ErrorMessage, Formik, Field, Form, useFormik } from 'formik';
 import Grid from '@mui/material/Grid';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 function Fav(props) {
 
     const [favList, setFavList] = useState([]);
     const [option, setOption] = useState("");
+    const [edit, setEdit] = useState(false);
+    const [editColor, setEditColor] = useState("#1ABC9C");
+    const [editKey, setEditKey] = useState("编辑");
+    const [editFolderTrash, setEditFolderTrash] = useState("hidden");
     const Item = styled(Paper)(({ theme }) => ({
         backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
         ...theme.typography.body2,
@@ -46,7 +52,7 @@ function Fav(props) {
         backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
         ...theme.typography.body2,
         padding: theme.spacing(1),
-       
+        textAlign:"left",
         boxShadow:'none'
       }));
 
@@ -155,13 +161,32 @@ function Fav(props) {
     showIgnore = <span style={{visibility:"hidden"}}>当前过滤关键字：</span>
   }
 
-  
+
   let test;
   let showFolder;
   let showContent;
   let showUser;
   let showLogin;
   let showSignup;
+
+  function handleEdit(){
+    if (edit == false) {
+      console.log("编辑状态开启");
+      
+      setEditKey("取消编辑");
+      setEdit(true);
+      setEditColor("#E74C3C");
+      setEditFolderTrash("visible");
+    }else{    
+      console.log("编辑状态关闭");
+      setEditKey("编辑");
+      setEdit(false);
+      setEditColor("#1ABC9C");
+      setEditFolderTrash("hidden");
+    }
+
+  }
+  
 
   //Eliminate duplicate folder name by using 'Set'
   const mySet1 = new Set()
@@ -176,7 +201,10 @@ function Fav(props) {
 
   //Print all folders
   test = arr.map((row) => (
-    <Item><Button onClick={() => setOption(row)} disableRipple style={{background:"transparent", padding:"0px", margin:"0px"}}><h3>{row}<span> {">"} </span></h3></Button></Item>
+    <>
+    
+    <Item2><Button><DeleteForeverIcon style={{color:"red", visibility:editFolderTrash}}/></Button>&nbsp;&nbsp;<Button><EditIcon style={{color:"#BB8FCE", visibility:editFolderTrash}}/></Button>&nbsp;&nbsp;<Button onClick={() => setOption(row)} disableRipple style={{background:"transparent", padding:"0px", margin:"0px"}}><h3>{row}<span> {">"} </span></h3></Button></Item2>
+    </>
   ))
 
 
@@ -198,7 +226,9 @@ function Fav(props) {
 
   
  showContent = dataValue.filter(val => val.folder == option).map((row) => (
-  <Item><span>{row.result}</span></Item>
+   <>
+  <Item><Button><DeleteForeverIcon style={{color:"red", visibility:editFolderTrash}}/></Button><span>{row.result}</span></Item>
+  </>
  ))
 
 
@@ -266,8 +296,11 @@ function Fav(props) {
         <Grid item xs={6}>
           <Item><h1>{props.nickName}的收藏夹:</h1></Item>
         </Grid>
+
+        <Grid item xs={6}>
+          <Item><h1><Button onClick={() => {handleEdit();}}><span style={{fontSize:"30px",color:editColor}}><EditIcon></EditIcon>&nbsp;{editKey}</span></Button></h1></Item>
+        </Grid>
       
-        
       </Grid>
     </Box>
         
