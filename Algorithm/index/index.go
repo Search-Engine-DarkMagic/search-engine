@@ -101,7 +101,7 @@ func Index() {
 		}
 
 		//把所有结果都编成页码，后期倒序索引用得到
-		m[count] = caption
+		m[count] = str
 		//页码++
 		count++
 	}

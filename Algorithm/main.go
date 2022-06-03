@@ -114,7 +114,7 @@ func main() {
 	}
 
 	//搜索关键词
-	result := "amazon"
+	result := "原神"
 
 	//中英文一起搜索，用count来计数
 	searchENandCN := 0
@@ -149,6 +149,7 @@ func main() {
 				//读取搜索结果
 				cell1, _ := f.GetCellValue("Sheet1", locationLimit)
 
+				fmt.Println(cell1)
 				//检测搜索关键词是否出现在搜索结果中
 				if result == cell1[strings.Index(cell1, " ")+1:] {
 
@@ -157,11 +158,16 @@ func main() {
 					s := strings.Split(finalResult, " ")
 
 					for value := range s {
+
+						//隔离网址与搜索结果
+						captionIndex := strings.Index(m[s[value]], " ")
+						hello := m[s[value]][captionIndex+1:]
+
 						//把搜索结果放到map里面
-						searchResultRelated[m[s[value]]] = strings.Index(m[s[value]], result)
+						searchResultRelated[m[s[value]]] = strings.Index(hello, result)
 
 						//继续分词，为了相关度搜索
-						words = x.Cut(m[s[value]], use_hmm)
+						words = x.Cut(hello, use_hmm)
 
 						//把分好的词放OtherRelatedKey里面
 						for _, value := range words {
@@ -188,8 +194,10 @@ func main() {
 			//检测结果如果是英文：（大致流程同上）
 
 			value := result[0:1]
-
+			value = strings.ToLower(value)
+			fmt.Println("value is ", value)
 			s := strings.Split(contextClue[value], " ")
+
 			starting, _ := strconv.Atoi(s[0])
 			ending, _ := strconv.Atoi(s[1])
 
