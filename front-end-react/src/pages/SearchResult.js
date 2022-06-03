@@ -21,8 +21,24 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 import { styled } from '@mui/material/styles';
-import loadingLogo from '../images/loading.gif'
+import loadingLogo from '../images/loading.gif';
+import StarIcon from '@mui/icons-material/Star';
+import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import { ErrorMessage, Formik, Field, Form, useFormik } from 'formik';
+import InputLabel from '@mui/material/InputLabel';
+
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import * as Yup from 'yup';
 function SearchResult(props) {
+
+  const [inputError, setInputError] = useState(false);
+  const [dataValue, setDataValue] = useState([]);
+  const validate = Yup.object({
+    folder: Yup.string()
+    .required('必填'),
+});
   const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
     ...theme.typography.body2,
@@ -33,9 +49,44 @@ function SearchResult(props) {
     marginLeft:'20%'
   }));
 
+  const Item2= styled(Paper)(({ theme }) => ({
+    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+    ...theme.typography.body2,
+    padding: theme.spacing(3),
+    textAlign: 'left',
+    boxShadow:'none',
+
+  }));
+  const [age, setAge] = React.useState('');
+
+  const handleChange = (event) => {
+    setAge(event.target.value);
+  };
+
   const [searchResult, setSearchResult] = useState([]);
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+
+  const [openFav, setOpenFav] = useState(false);
+  let showNewFavName;
+  const [newFavName, setNewFavName] = useState('');
+  const inputFavName = () => {
+    setNewFavName(true);
+  }
+
+  const cancelFavName = () => {
+    setNewFavName(false);
+  }
+
+  const handleFavCloseNull = () => {
+    setOpenFav(false);
+    setNewFavName(false);
+  };
+
+  const handleFavClose = () => {
+    setOpen(false);
+  };
+
   useEffect(() => {
     
     setResult(params.keyword.slice(7));
@@ -82,10 +133,46 @@ function SearchResult(props) {
     console.log(error);
   }), 1000);
      
+
+  axios({
+    method: 'get',
+    url: 'http://localhost:4000/v1/userinfo',
+    withCredentials: true,
+}).then(function (response) {
+  setEmail(response.data.message.email);
+  console.log(response.data.message.email);
+  console.log(email);
+})
+.catch(function (error) {
+  if (error.response) {
+    console.log(error);
+  }
+
+})
+
+setTimeout(() => axios({
+  method: 'post',
+  url: 'http://localhost:4000/v1/favFolderRetrieve',
+  withCredentials: true,
+data: {
+ email: email,
+}
+}).then(function (response) {
+
+console.log(response.data.message);
+setDataValue(response.data.message);
+console.log(dataValue);
+
+})
+.catch(function (error) {
+
+console.log(error);
+}), 1000);
      
  }, [email],[searchResult]);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [resultWantToSave, setResultWantToSave] = useState('');
   const open2 = Boolean(anchorEl);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -121,7 +208,11 @@ function SearchResult(props) {
     const [result, setResult] = useState('');
     const params = useParams();
 
-
+    function handleFavClickOpen(fav) {
+      setOpenFav(true);
+      console.log(fav);
+      setResultWantToSave(fav);
+    }
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -155,7 +246,7 @@ function SearchResult(props) {
    
     resultShowing = searchResult.map((rows)=> (
       <>
-      <div className="boxbox">
+      <div className="boxbox" key={rows.id}>
 
       <Box sx={{ flexGrow: 1 }}>
     <Grid container spacing={2}>
@@ -163,24 +254,89 @@ function SearchResult(props) {
         <Item><span style={{marginTop:'30px'}}>{rows}</span></Item>
       </Grid>
       <Grid item xs={2}>
-        <Item><Button>添加收藏夹</Button></Item>
+        <Item><Button onClick={() => {handleFavClickOpen(rows);}}><span style={{fontWeight:"700"}}>添加收藏夹</span><StarIcon style={{color:"#F1C40F"}}/></Button></Item>
       </Grid>
     </Grid>
   </Box>
-
-
-     
       </div>
       </>
    ))
   }
 
 
+  if (newFavName == true) {
+    showNewFavName = <>
+    <Formik
+      initialValues={{
+        folder: "",
+
+      }}
+      validationSchema={validate}
+      onSubmit={(values) => {
+        console.log(values);
+        axios({
+          method: 'post',
+          url: 'http://localhost:4000/v1/favFolder',
+          data: {
+            folder: values.folder,
+            email: props.email,
+            
+          },
+      }).then(function (response) {
+        console.log(JSON.stringify(response.data.message));
+          alert(`文件夹创建成功！`)
+          window.location.reload();
+      })
+      .catch(function (error) {
+        if (error.response) {
+          console.log(error);
+          alert(`创建失败！文件夹已存在.`)
+        }
+      })
+      }}
+    >
+      {({ values,handleChange, touched, errors }) => (
+        <Form>
+        <TextField
+          label="文件夹名字"
+          id="folder"
+          name="folder"
+          type="text"
+          value={values.folder}
+          InputProps={{
+            style:{fontFamily:"Quicksand", fontWeight:"700"}
+          }}
+          onChange={(e) => { handleChange(e); setInputError(false); }}
+          error={inputError} 
+            
+          
+             
+          />
+          
+          <div></div>
+            {errors.folder && touched.folder ? setInputError(true) : console.log("H")}
+            
+            
+    <Button type="submit">确认</Button>
+    <Button onClick={cancelFavName}>取消</Button>
+        </Form>
+      )}
+    </Formik>
+
+    
+    </>
+
+}else {
+  showNewFavName = <>
+  <TextField label="文件夹名字" style={{visibility:"hidden"}}></TextField>
+  <Button style={{visibility:"hidden"}}>确认</Button>
+  </>
+}
 
     let showUser;
   let showLogin;
   let showSignup;
-
+  let test;
 
   if (props.nickName !== ''){
     showUser = <><Button
@@ -224,8 +380,45 @@ function SearchResult(props) {
   }
 
 
+    //Eliminate duplicate folder name by using 'Set'
+    const mySet1 = new Set()
+
+    //Add all folder names into Set
+    for (let i = 0; i < Object.keys(dataValue).length; i++) {
+      mySet1.add(dataValue[i].folder);
+    }
+  
+    //Convert Set to array
+    const arr = Array.from(mySet1);
+  
+    //Print all folders
+    test = arr.map((row) => (
+      <MenuItem value={row}>{row}</MenuItem>
+    ))
+
+
+      function addFavToDB(){
+        axios({
+          method: 'post',
+          url: 'http://localhost:4000/v1/addFav',
+          data: {
+            email: "mayichong123@gmail.com",
+            folder: age,
+            result: resultWantToSave,
+          },
+      }).then(function (response) {
+        console.log(JSON.stringify(response.data.message));
+          setOpenFav(false);
+      })
+      .catch(function (error) {
+        if (error.response) {
+          console.log(error);
+        }
+      })
+      }
     return (
         <>
+        
         <AppBar style={{ background: '#1F618D' }} elevation={0}>
           <Toolbar >
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -244,6 +437,54 @@ function SearchResult(props) {
         {showIgnore}
         <div></div>
         <Button style={{minWidth: '50px', minHeight: '55px'}} onClick={handleClickOpen}>高级搜索</Button>
+        <Dialog open={openFav} onClose={handleFavClose}>
+        <DialogTitle>个人收藏夹:</DialogTitle>
+        <DialogContent>
+
+          
+         <Box sx={{ flexGrow: 1 }}>
+      <Grid container spacing={2}>
+      <Grid item xs={6}>
+        <Item2><Button disableRipple={true}  style={{ backgroundColor: 'transparent' }}><StarIcon style={{color:"#F1C40F"}}/>&nbsp;添加到哪个文件夹中？</Button></Item2>
+        </Grid>
+        <Grid item xs={6}>
+          <Item2>    <Box sx={{ minWidth: 120 }}>
+      <FormControl fullWidth>
+        <InputLabel id="demo-simple-select-label">收藏夹</InputLabel>
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={age}
+          label="Age"
+          onChange={handleChange}
+          
+        >
+
+          {test}
+         
+        </Select>
+        <Button onClick={addFavToDB} disableRipple = {true} style={{ backgroundColor: 'transparent' }} color="inherit">保存</Button>
+      </FormControl>
+    </Box></Item2>
+        </Grid>
+        <Grid item xs={6}>
+          <Item2><Button onClick={inputFavName} style={{ backgroundColor: 'transparent' }}><CreateNewFolderIcon/>&nbsp;新建并保存到此文件夹</Button></Item2>
+        </Grid>
+        <Grid item xs={6}>
+          <Item2>{showNewFavName}</Item2>
+        </Grid>
+        
+      </Grid>
+    </Box>
+        </DialogContent>
+        <DialogActions>
+          
+          <Button onClick={handleFavCloseNull}>取消</Button>
+          
+        </DialogActions>
+      </Dialog>
+
+
         <Dialog open={open} onClose={handleClose}>
         <DialogTitle>高级搜索设置:</DialogTitle>
         <DialogContent>
@@ -283,8 +524,9 @@ function SearchResult(props) {
         <hr style={{width:"50%"}}></hr>
 
         {resultShowing}
-       
      </div>
+
+     
         
      </>
     )

@@ -325,7 +325,7 @@ function SearchEngineMain(props) {
           <Item>{showNewFavName}</Item>
         </Grid>
         <Grid item xs={6}>
-        <Item><Button component={Link} to="/v1/fav" style={{ backgroundColor: 'transparent' }}><ManageAccountsIcon/>&nbsp;管理收藏夹</Button></Item>
+        <Item><Button component={Link} to="/v1/fav" style={{ backgroundColor: 'transparent' }}><ManageAccountsIcon/>&nbsp;管理查看收藏夹</Button></Item>
         </Grid>
         <Grid item xs={6}>
           <Item>*管理文件夹包括：添加，删除，修改文件夹以及搜索结果.</Item>
