@@ -106,3 +106,10 @@ body {
 h3 {
   margin:0px;
 }
+
+.boxbox {
+  margin-top: 50px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+

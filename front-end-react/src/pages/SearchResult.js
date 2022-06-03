@@ -17,9 +17,25 @@ import {useParams} from 'react-router-dom';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Grid from '@mui/material/Grid';
+import { styled } from '@mui/material/styles';
+import loadingLogo from '../images/loading.gif'
 function SearchResult(props) {
+  const Item = styled(Paper)(({ theme }) => ({
+    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+    ...theme.typography.body2,
+    padding: theme.spacing(3),
+    textAlign: 'left',
+    boxShadow:'none',
+    fontSize:'20px',
+    marginLeft:'20%'
+  }));
+
+  const [searchResult, setSearchResult] = useState([]);
   const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     
     setResult(params.keyword.slice(7));
@@ -31,6 +47,7 @@ function SearchResult(props) {
         withCredentials: true,
     }).then(function (response) {
       setEmail(response.data.message.email);
+
       console.log(response.data.message.email);
       console.log(email);
     })
@@ -49,15 +66,24 @@ function SearchResult(props) {
      email: email,
    }
   }).then(function (response) {
-   console.log(response);
-   console.log(email);
+   
+   if (!response.data.data.result){
+     console.log("jesus");
+     setSearchResult(['空']);
+   }else {   
+     console.log(response.data.data.result);
+    setSearchResult(response.data.data.result);
+ }
+
+   setIsLoading(false);
+   console.log(searchResult);
   })
   .catch(function (error) {
     console.log(error);
   }), 1000);
      
      
- }, [email]);
+ }, [email],[searchResult]);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open2 = Boolean(anchorEl);
@@ -94,6 +120,9 @@ function SearchResult(props) {
     const [ignore, setIgnore] = useState('');
     const [result, setResult] = useState('');
     const params = useParams();
+
+
+
     const handleClickOpen = () => {
         setOpen(true);
       };
@@ -119,12 +148,40 @@ function SearchResult(props) {
   }else{
     showIgnore = <span style={{visibility:"hidden"}}>当前过滤关键字：</span>
   }
+  let resultShowing;
+  if (Object.keys(searchResult).length === 1 && searchResult=='空'){
+    resultShowing = <p style={{paddingTop:"30px"}}>很抱歉，没有找到相关搜索结果</p>
+  }else {
+   
+    resultShowing = searchResult.map((rows)=> (
+      <>
+      <div className="boxbox">
+
+      <Box sx={{ flexGrow: 1 }}>
+    <Grid container spacing={2}>
+      <Grid item xs={8}>
+        <Item><span style={{marginTop:'30px'}}>{rows}</span></Item>
+      </Grid>
+      <Grid item xs={2}>
+        <Item><Button>添加收藏夹</Button></Item>
+      </Grid>
+    </Grid>
+  </Box>
+
+
+     
+      </div>
+      </>
+   ))
+  }
 
 
 
     let showUser;
   let showLogin;
   let showSignup;
+
+
   if (props.nickName !== ''){
     showUser = <><Button
     id="basic-button"
@@ -161,6 +218,11 @@ function SearchResult(props) {
     showSignup = <Button component={Link} color="inherit"
     to="/v1/signup"><span style={{fontWeight:"800"}}>注册</span></Button>
   }
+
+  if (isLoading) {
+    return <div className="App"><p style={{textAlign:"center", fontSize:"50px"}}>拼命搜索中...</p><img height= "200px" src={loadingLogo} alt="loading..." /></div>;
+  }
+
 
     return (
         <>
@@ -219,6 +281,9 @@ function SearchResult(props) {
        
       <h1>搜索结果如下:</h1>
         <hr style={{width:"50%"}}></hr>
+
+        {resultShowing}
+       
      </div>
         
      </>

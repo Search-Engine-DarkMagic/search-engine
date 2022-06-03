@@ -3,7 +3,9 @@ package router
 import (
 	"fmt"
 	"net/http"
+	"search/Algorithm"
 	"search/model"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -28,7 +30,16 @@ func searchResult(c *gin.Context) {
 	filter := c.Query("filter")
 
 	//确认后端收到没有
-	info := "backend received: result is " + result + " and filter is " + filter
+	// info := "backend received: result is " + result + " and filter is " + filter
+
+	//运行搜索算法
+
+	a, b := Algorithm.Algorithm(result)
+
+	//后端打印出来
+	fmt.Println("Brob")
+	fmt.Println(a)
+	fmt.Println(b)
 	var userEmail model.UserEmail
 	//接受用户email来添加历史记录
 	err2 := c.ShouldBindJSON(&userEmail)
@@ -59,7 +70,32 @@ func searchResult(c *gin.Context) {
 		//如果用户不存在，什么都不存
 		fmt.Println("Not registered!")
 	}
-	c.JSON(http.StatusOK, gin.H{"data": info})
+
+	//数据调整
+	var resultSorted []string
+	var urlSorted []string
+	fmt.Println(filter)
+	for _, value := range a {
+		captionIndex := strings.Index(value, " ")
+		caption := value[captionIndex+1:]
+		caption2 := value[0:captionIndex]
+
+		if strings.Contains(caption, filter) && filter != "" {
+
+		} else {
+			resultSorted = append(resultSorted, caption)
+			urlSorted = append(urlSorted, caption2)
+		}
+
+	}
+
+	//返回前端
+	totalResult := model.SearchResult{
+		Result:  resultSorted,
+		URL:     urlSorted,
+		Keyword: b,
+	}
+	c.JSON(http.StatusOK, gin.H{"data": totalResult})
 
 	// searchResult = result
 	// searchFilter = filter
@@ -67,5 +103,6 @@ func searchResult(c *gin.Context) {
 
 //获取搜索结果（WIP）
 func getResult(c *gin.Context) {
+	//后台运行搜索运算
 
 }

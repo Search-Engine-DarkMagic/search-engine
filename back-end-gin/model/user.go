@@ -35,3 +35,9 @@ type RenameFolder struct {
 	OldFolder string `json:"oldFolder"`
 	NewFolder string `json:"newFolder"`
 }
+
+type SearchResult struct {
+	Result  []string `json:"result"`
+	URL     []string `json:"url"`
+	Keyword []string `json:"key"`
+}
