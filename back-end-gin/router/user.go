@@ -22,7 +22,7 @@ const SecretKey = "secret"
 //用户注册
 func userSignup(c *gin.Context) {
 	//连接google cloud服务器
-	dsn := "root:888888@tcp(34.66.167.238:3306)/user?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(35.243.204.112:3306)/user?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("can't connect to database")
@@ -67,7 +67,7 @@ func userSignup(c *gin.Context) {
 //用户登录
 func userLogin(c *gin.Context) {
 	//连接服务器
-	dsn := "root:888888@tcp(34.66.167.238:3306)/user?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(35.243.204.112:3306)/user?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("can't connect to database")
@@ -121,7 +121,7 @@ func userLogin(c *gin.Context) {
 
 //获取用户信息
 func userInfo(c *gin.Context) {
-	dsn := "root:888888@tcp(34.66.167.238:3306)/user?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(35.243.204.112:3306)/user?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("can't connect to database")
@@ -175,7 +175,7 @@ func logout(c *gin.Context) {
 
 //用户历史记录
 func history(c *gin.Context) {
-	dsn := "root:888888@tcp(34.66.167.238:3306)/histories?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(35.243.204.112:3306)/histories?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("can't connect to database")
@@ -200,7 +200,7 @@ func history(c *gin.Context) {
 
 //用户收藏夹（无效）
 func favorite(c *gin.Context) {
-	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(35.243.204.112:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("can't connect to database")
@@ -223,7 +223,7 @@ func favorite(c *gin.Context) {
 
 //用户创建收藏夹
 func favFolderCreate(c *gin.Context) {
-	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(35.243.204.112:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("can't connect to database")
@@ -262,9 +262,50 @@ func favFolderCreate(c *gin.Context) {
 
 }
 
+//用户快速创建收藏夹并保存
+func favFolderCreateNSave(c *gin.Context) {
+	dsn := "root:123456@tcp(35.243.204.112:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic("can't connect to database")
+	}
+
+	db.AutoMigrate(&model.Fav{})
+
+	var fav model.Fav
+	//前端拿到收藏夹信息
+	err2 := c.ShouldBindJSON(&fav)
+
+	if err2 != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Not found!"})
+		return
+	}
+
+	//创建收藏夹（数据为空）
+	favFolder := model.Fav{
+		Email:  fav.Email,
+		Folder: fav.Folder,
+		Result: fav.Result,
+	}
+
+	//寻找email对应收藏夹信息
+	var checkDup model.Fav
+	db.Where("email = ? AND folder = ?", fav.Email, fav.Folder).Find(&checkDup)
+
+	//检测收藏夹是否存在
+	if len(checkDup.Email) != 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "folder already existed!"})
+	} else {
+		//不存在的话，就创建收藏夹
+		db.Create(&favFolder)
+		c.JSON(http.StatusOK, gin.H{"message": "success!"})
+	}
+
+}
+
 //用户收藏夹查看
 func favFolderList(c *gin.Context) {
-	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(35.243.204.112:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("can't connect to database")
@@ -288,27 +329,9 @@ func favFolderList(c *gin.Context) {
 
 }
 
-//用户添加搜索结果到收藏夹（无效）
-func favResultAdd(c *gin.Context) {
-	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic("can't connect to database")
-	}
-
-	//（dummy data）
-	favFolder := model.Fav{
-		Email:  "mayichong123@gmail.com",
-		Folder: "美食",
-		Result: "美食1号",
-	}
-
-	db.Create(&favFolder)
-}
-
 //用户添加搜索结果到收藏夹
 func addFav(c *gin.Context) {
-	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(35.243.204.112:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("can't connect to database")
@@ -319,13 +342,22 @@ func addFav(c *gin.Context) {
 	//前端数据
 	c.BindJSON(&test)
 
+	var findEmptyFav model.Fav
+	db.Where("email = ? AND folder = ? AND result = ?", test.Email, test.Folder, "empty").Take(&findEmptyFav)
+
+	var empty model.Fav
+
+	if findEmptyFav != empty {
+		db.Where("email = ? AND folder = ? AND result = ?", test.Email, test.Folder, "empty").Delete(&findEmptyFav)
+	}
 	//创建
 	db.Create(&test)
+
 }
 
 //用户删除收藏夹搜索结果
 func deleteFav(c *gin.Context) {
-	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(35.243.204.112:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("can't connect to database")
@@ -338,11 +370,24 @@ func deleteFav(c *gin.Context) {
 	//找到用户email+文件夹名称+结果
 	db.Where("email = ? AND folder = ? AND result = ?", test.Email, test.Folder, test.Result).Delete(&test)
 
+	var checkEmpty model.Fav
+	var empty model.Fav
+	db.Where("email = ? AND folder = ? AND result = ?", test.Email, test.Folder, test.Result).Take(&checkEmpty)
+
+	if checkEmpty == empty {
+		favFolder := model.Fav{
+			Email:  test.Email,
+			Folder: test.Folder,
+			Result: "空",
+		}
+
+		db.Create(&favFolder)
+	}
 }
 
 //用户删除收藏夹
 func deleteFavFolder(c *gin.Context) {
-	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(35.243.204.112:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("can't connect to database")
@@ -358,7 +403,7 @@ func deleteFavFolder(c *gin.Context) {
 
 //用户重命名收藏夹
 func renameFolder(c *gin.Context) {
-	dsn := "root:888888@tcp(34.66.167.238:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(35.243.204.112:3306)/favorites?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("can't connect to database")
@@ -367,7 +412,6 @@ func renameFolder(c *gin.Context) {
 	var test model.RenameFolder
 	var test2 model.Fav
 	c.BindJSON(&test)
-	fmt.Println("please1111111")
 	fmt.Println(test.NewFolder)
 	//更新文件夹名称
 	db.Model(&test2).Where("email = ? AND folder = ?", test.Email, test.OldFolder).Update("folder", test.NewFolder)

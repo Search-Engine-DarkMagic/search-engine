@@ -27,7 +27,7 @@ import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import { ErrorMessage, Formik, Field, Form, useFormik } from 'formik';
 import InputLabel from '@mui/material/InputLabel';
-
+import FolderIcon from '@mui/icons-material/Folder';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import * as Yup from 'yup';
@@ -68,8 +68,19 @@ function SearchResult(props) {
   const [isLoading, setIsLoading] = useState(true);
 
   const [openFav, setOpenFav] = useState(false);
+  const [openFav2, setOpenFav2] = useState(false);
   let showNewFavName;
   const [newFavName, setNewFavName] = useState('');
+
+  const handleFavClickOpen2 = () => {
+    setOpenFav2(true);
+  }
+
+  const handleFavCloseNull2 = () => {
+    setOpenFav2(false);
+  };
+
+
   const inputFavName = () => {
     setNewFavName(true);
   }
@@ -121,9 +132,10 @@ function SearchResult(props) {
    if (!response.data.data.result){
      console.log("jesus");
      setSearchResult(['空']);
+     
    }else {   
      console.log(response.data.data.result);
-    setSearchResult(response.data.data.result);
+     setSearchResult(response.data.data.result);
  }
 
    setIsLoading(false);
@@ -159,9 +171,13 @@ data: {
 }
 }).then(function (response) {
 
-console.log(response.data.message);
-setDataValue(response.data.message);
-console.log(dataValue);
+  if (!response.data.message) {
+    setDataValue("空");
+  }else{
+    console.log(response.data.message);
+    setDataValue(response.data.message);
+    console.log(dataValue);
+  }
 
 })
 .catch(function (error) {
@@ -243,7 +259,7 @@ console.log(error);
   if (Object.keys(searchResult).length === 1 && searchResult=='空'){
     resultShowing = <p style={{paddingTop:"30px"}}>很抱歉，没有找到相关搜索结果</p>
   }else {
-   
+    console.log(searchResult)
     resultShowing = searchResult.map((rows)=> (
       <>
       <div className="boxbox" key={rows.id}>
@@ -276,16 +292,18 @@ console.log(error);
         console.log(values);
         axios({
           method: 'post',
-          url: 'http://localhost:4000/v1/favFolder',
+          url: 'http://localhost:4000/v1/favFolderCreateNSave',
           data: {
             folder: values.folder,
             email: props.email,
+            result: resultWantToSave,
             
           },
       }).then(function (response) {
         console.log(JSON.stringify(response.data.message));
           alert(`文件夹创建成功！`)
-          window.location.reload();
+          setOpenFav(false);
+          // window.location.reload();
       })
       .catch(function (error) {
         if (error.response) {
@@ -339,7 +357,9 @@ console.log(error);
   let test;
 
   if (props.nickName !== ''){
-    showUser = <><Button
+    showUser = <>
+    <Button onClick={handleFavClickOpen2} color="inherit"><FolderIcon />&nbsp;<span style={{fontWeight:"800"}}>收藏夹</span></Button>&nbsp;&nbsp;
+    <Button
     id="basic-button"
     aria-controls={open2 ? 'basic-menu' : undefined}
     aria-haspopup="true"
@@ -384,10 +404,16 @@ console.log(error);
     const mySet1 = new Set()
 
     //Add all folder names into Set
-    for (let i = 0; i < Object.keys(dataValue).length; i++) {
-      mySet1.add(dataValue[i].folder);
+
+    if (Object.keys(dataValue).length == 0) {
+      mySet1.add("空");
+    }else{
+
+      for (let i = 0; i < Object.keys(dataValue).length; i++) {
+        mySet1.add(dataValue[i].folder);
+      }
     }
-  
+
     //Convert Set to array
     const arr = Array.from(mySet1);
   
@@ -402,12 +428,13 @@ console.log(error);
           method: 'post',
           url: 'http://localhost:4000/v1/addFav',
           data: {
-            email: "mayichong123@gmail.com",
+            email: email,
             folder: age,
             result: resultWantToSave,
           },
       }).then(function (response) {
         console.log(JSON.stringify(response.data.message));
+        alert(`保存成功！`);
           setOpenFav(false);
       })
       .catch(function (error) {
@@ -508,6 +535,27 @@ console.log(error);
         <DialogActions>
           <Button onClick={handleClose}>确定</Button>
           <Button onClick={handleCloseNull}>取消</Button>
+          
+        </DialogActions>
+      </Dialog>
+      <Dialog open={openFav2} onClose={handleFavClose}>
+        <DialogTitle>个人收藏夹:</DialogTitle>
+        <DialogContent>  
+         <Box sx={{ flexGrow: 1 }}>
+      <Grid container spacing={2}>
+       
+        <Grid item xs={6}>
+        <Item><Button component={Link} to="/v1/fav" style={{ backgroundColor: 'transparent' }}><ManageAccountsIcon/>&nbsp;管理查看收藏夹</Button></Item>
+        </Grid>
+        <Grid item xs={6}>
+          <Item>*管理文件夹包括：添加，删除，修改文件夹以及搜索结果.</Item>
+        </Grid>
+      </Grid>
+    </Box>
+        </DialogContent>
+        <DialogActions>
+          
+          <Button onClick={handleFavCloseNull2}>取消</Button>
           
         </DialogActions>
       </Dialog>

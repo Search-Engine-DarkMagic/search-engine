@@ -17,22 +17,27 @@ import {useParams} from 'react-router-dom';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
-import { ErrorMessage, Formik, Field, Form, useFormik } from 'formik';
 import Grid from '@mui/material/Grid';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 function Fav(props) {
 
+  const [open3, setOpen3] = React.useState(false);
+
+  const handleClickOpen3 = () => {
+    setOpen3(true);
+    setNewFolderName(folderName);
+  };
+
+  const handleClose3 = () => {
+    setOpen3(false);
+  };
+
+    const [folderName, setFolderName] = useState('');
+    const [newFolderName, setNewFolderName] = useState('');
     const [favList, setFavList] = useState([]);
     const [option, setOption] = useState("");
     const [edit, setEdit] = useState(false);
@@ -186,7 +191,85 @@ function Fav(props) {
     }
 
   }
+
+  function deleteFavFolder(row){
+    console.log(row);
+
+    axios({
+      method: 'post',
+      url: 'http://localhost:4000/v1/deleteFavFolder',
+      withCredentials: true,
+      data: {
+        email: email,
+        folder: row,
+      }
+     }).then(function (response) {
+       alert(`删除成功!`)
+      window.location.reload(false);
+  })
+  .catch(function (error) {
+    if (error.response) {
+      console.log(error);
+    }
+
+  })
+
+  }
+
+  function deleteFavResult(row){
+    console.log(row.result);
+
+    axios({
+      method: 'post',
+      url: 'http://localhost:4000/v1/deleteFav',
+      withCredentials: true,
+      data: {
+        email: row.email,
+        folder: row.folder,
+        result: row.result,
+      }
+     }).then(function (response) {
+       alert(`删除成功!`)
+      window.location.reload(false);
+  })
+  .catch(function (error) {
+    if (error.response) {
+      console.log(error);
+    }
+
+  })
+
+
+  }
+
+  function editFavFolder(row){
+    console.log(row);
+    setOpen3(true);
+    setFolderName(row);
+    
+  }
   
+  function updateFolderName(){
+    axios({
+      method: 'post',
+      url: 'http://localhost:4000/v1/renameFolder',
+      withCredentials: true,
+      data: {
+        email: email,
+        oldFolder: folderName,
+        newFolder: newFolderName,
+      }
+     }).then(function (response) {
+       alert(`更改成功!`)
+      window.location.reload(false);
+  })
+  .catch(function (error) {
+    if (error.response) {
+      console.log(error);
+    }
+
+  })
+  }
 
   //Eliminate duplicate folder name by using 'Set'
   const mySet1 = new Set()
@@ -199,11 +282,21 @@ function Fav(props) {
   //Convert Set to array
   const arr = Array.from(mySet1);
 
+
   //Print all folders
   test = arr.map((row) => (
     <>
     
-    <Item2><Button><DeleteForeverIcon style={{color:"red", visibility:editFolderTrash}}/></Button>&nbsp;&nbsp;<Button><EditIcon style={{color:"#BB8FCE", visibility:editFolderTrash}}/></Button>&nbsp;&nbsp;<Button onClick={() => setOption(row)} disableRipple style={{background:"transparent", padding:"0px", margin:"0px"}}><h3>{row}<span> {">"} </span></h3></Button></Item2>
+    <Item2>
+      <Button>
+      <DeleteForeverIcon onClick={() => deleteFavFolder(row)} style={{color:"red", visibility:editFolderTrash}}/>
+      </Button>&nbsp;&nbsp;
+      
+      <Button onClick={() => editFavFolder(row)}>
+      <EditIcon style={{color:"#BB8FCE", visibility:editFolderTrash}}/>
+      </Button>&nbsp;&nbsp;
+      
+      <Button onClick={() => setOption(row)} disableRipple style={{background:"transparent", padding:"0px", margin:"0px"}}><h3>{row}<span> {">"} </span></h3></Button></Item2>
     </>
   ))
 
@@ -227,7 +320,10 @@ function Fav(props) {
   
  showContent = dataValue.filter(val => val.folder == option).map((row) => (
    <>
-  <Item><Button><DeleteForeverIcon style={{color:"red", visibility:editFolderTrash}}/></Button><span>{row.result}</span></Item>
+  <Item>
+    <Button>
+      <DeleteForeverIcon onClick={() => deleteFavResult(row)} style={{color:"red", visibility:editFolderTrash}}/>
+    </Button><span>{row.result}</span></Item>
   </>
  ))
 
@@ -273,6 +369,39 @@ function Fav(props) {
 
     return (
         <>
+
+<div>
+      <Button variant="outlined" onClick={handleClickOpen3}>
+        Open form dialog
+      </Button>
+      <Dialog open={open3} onClose={handleClose3}>
+        <DialogTitle>更改文件夹名称</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+      <span> 旧文件夹名称: {folderName}</span>
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="newFolderName"
+            name="newFolderName"
+            label="输入新文件夹名称"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={newFolderName}
+          
+            onChange={e => setNewFolderName(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={updateFolderName}>确认</Button>
+          <Button onClick={handleClose3}>取消</Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+
+
         <AppBar style={{ background: '#1F618D' }} elevation={0}>
           <Toolbar >
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>

@@ -16,7 +16,7 @@ import (
 //搜索结果
 func searchResult(c *gin.Context) {
 	//连接服务器
-	dsn := "root:888888@tcp(34.66.167.238:3306)/histories?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(35.243.204.112:3306)/histories?charset=utf8mb4&parseTime=True&loc=Local"
 	//打开服务器
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	//检测服务器错误
