@@ -57,12 +57,22 @@ function SearchResult(props) {
     boxShadow:'none',
 
   }));
+
+  const Item3= styled(Paper)(({ theme }) => ({
+    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+    ...theme.typography.body2,
+    padding: theme.spacing(3),
+    textAlign: 'center',
+    boxShadow:'none',
+    spacing: '1',
+
+  }));
   const [age, setAge] = React.useState('');
 
   const handleChange = (event) => {
     setAge(event.target.value);
   };
-
+  const [searchKey, setSearchKey] = useState([]);
   const [searchResult, setSearchResult] = useState([]);
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -135,7 +145,9 @@ function SearchResult(props) {
      
    }else {   
      console.log(response.data.data.result);
+     console.log(response.data.data.key);
      setSearchResult(response.data.data.result);
+     setSearchKey(response.data.data.key);
  }
 
    setIsLoading(false);
@@ -144,7 +156,7 @@ function SearchResult(props) {
   .catch(function (error) {
     console.log(error);
   }), 1000);
-     
+
 
   axios({
     method: 'get',
@@ -185,7 +197,7 @@ data: {
 console.log(error);
 }), 1000);
      
- }, [email],[searchResult]);
+ }, [email],[searchResult],[searchKey]);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [resultWantToSave, setResultWantToSave] = useState('');
@@ -250,16 +262,33 @@ console.log(error);
         window.location.reload(false);        
         
       }
+
+      const searchRelated = (key) => {
+        
+        navigate('/v1/search/result=' + key + '&filter=');
+        window.location.reload(false);        
+        
+      }
+
   if (ignore !== ''){
     showIgnore = <span>当前过滤关键字：{ignore}</span>
   }else{
     showIgnore = <span style={{visibility:"hidden"}}>当前过滤关键字：</span>
   }
   let resultShowing;
+  let resultKeyShowing;
   if (Object.keys(searchResult).length === 1 && searchResult=='空'){
     resultShowing = <p style={{paddingTop:"30px"}}>很抱歉，没有找到相关搜索结果</p>
+    resultKeyShowing = <p></p>
   }else {
-    console.log(searchResult)
+    resultKeyShowing = searchKey.map((rows) => (
+      <>
+        <Button color="warning" onClick={() => {searchRelated(rows)}}><span style={{fontSize:"20px"}}>{rows}</span></Button>
+      </>
+     
+      
+    ))
+    
     resultShowing = searchResult.map((rows)=> (
       <>
       <div className="boxbox" key={rows.id}>
@@ -565,11 +594,21 @@ console.log(error);
      &nbsp;&nbsp;&nbsp;
   
      <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={search}><SearchIcon fontSize="large" className="searchButton"/></Button>
-    <div style={{marginBottom:"100px"}}></div>
+    <div style={{marginBottom:"40px"}}></div>
      </form>
        
+       <div>
+       <h3>相关搜索</h3>
+      <div style={{marginTop:"20px"}}></div>
+    {resultKeyShowing}
+
+       
+       </div>
+
+       <div style={{marginBottom:"70px"}}></div>
       <h1>搜索结果如下:</h1>
         <hr style={{width:"50%"}}></hr>
+
 
         {resultShowing}
      </div>
