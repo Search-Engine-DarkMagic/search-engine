@@ -31,7 +31,12 @@ import FolderIcon from '@mui/icons-material/Folder';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import * as Yup from 'yup';
+import PanoramaIcon from '@mui/icons-material/Panorama';
 function SearchResult(props) {
+
+  const searchImgAction = () => {
+    navigate('/v1/searchImg/result=' + result + '&filter=' + ignore);
+  }
 
   const [inputError, setInputError] = useState(false);
   const [dataValue, setDataValue] = useState([]);
@@ -593,7 +598,10 @@ console.log(error);
      <TextField className="searchBar" value={result} onChange={e => setResult(e.target.value)} id="outlined-basic" label="搜索" variant="outlined" InputProps={{ style: { fontFamily:"Quicksand", fontWeight:"700"} }} />
      &nbsp;&nbsp;&nbsp;
   
-     <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={search}><SearchIcon fontSize="large" className="searchButton"/></Button>
+     <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={search}><SearchIcon fontSize="large" className="searchButton"/>文字</Button>
+     &nbsp;&nbsp;&nbsp;
+     <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={searchImgAction} color="success"><PanoramaIcon fontSize="large" className="searchButton"/> &nbsp;图片</Button>
+
     <div style={{marginBottom:"40px"}}></div>
      </form>
        

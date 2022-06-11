@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import './App.css';
 import SearchEngineMain from "./pages/SearchEngineMain";
 import SearchResult from "./pages/SearchResult";
+import SearchResultImg from "./pages/SearchResultImg";
 import SignupPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
 import History from "./pages/History";
@@ -39,6 +40,7 @@ function App() {
       <Routes>
         <Route path="/" element={<SearchEngineMain nickName={nickName} setNickName={setNickName} email={email} />} />
         <Route path="/v1/search/:keyword&:filter" element={<SearchResult nickName={nickName} email={email}/>} />
+        <Route path="/v1/searchImg/:keyword&:filter" element={<SearchResultImg nickName={nickName} email={email}/>} />
         <Route path="/v1/signup" element={<SignupPage />} />
         <Route path="/v1/login" element={<LoginPage setNickName={setNickName} nickName={nickName}/>} />
         <Route path="/v1/history" element={<History nickName={nickName}/>} />

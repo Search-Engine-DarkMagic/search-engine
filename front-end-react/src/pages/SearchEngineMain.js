@@ -25,7 +25,8 @@ import Grid from '@mui/material/Grid';
 import FolderIcon from '@mui/icons-material/Folder';
 import * as Yup from 'yup';
 import { ErrorMessage, Formik, Field, Form, useFormik } from 'formik';
-
+import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
+import PanoramaIcon from '@mui/icons-material/Panorama';
 function SearchEngineMain(props) {
   const [inputError, setInputError] = useState(false);
   const validate = Yup.object({
@@ -85,6 +86,10 @@ function SearchEngineMain(props) {
   const [newFavName, setNewFavName] = useState('');
   const search = () => {
     navigate('/v1/search/result=' + result + '&filter=' + ignore);
+  }
+
+  const searchImg = () => {
+    navigate('/v1/searchImg/result=' + result + '&filter=' + ignore);
   }
 
   const handleClickOpen = () => {
@@ -299,22 +304,6 @@ function SearchEngineMain(props) {
       <Dialog open={openFav} onClose={handleFavClose}>
         <DialogTitle>个人收藏夹:</DialogTitle>
         <DialogContent>
-         
-        
-          
-          
-          {/* <TextField
-            autoFocus
-            margin="dense"
-            id="keyword"
-            type="keyword"
-            fullWidth
-            variant="standard"
-            name="ignore"
-            value={ignore}
-            onChange={e => setIgnore(e.target.value)}
-            InputProps={{ style: { fontFamily:"Quicksand", fontWeight:"700"} }}
-          /> */}
           
          <Box sx={{ flexGrow: 1 }}>
       <Grid container spacing={2}>
@@ -344,7 +333,9 @@ function SearchEngineMain(props) {
      <TextField className="searchBar" onChange={e => setResult(e.target.value)} id="outlined-basic" label="搜索" variant="outlined" InputProps={{ style: { fontFamily:"Quicksand", fontWeight:"700"} }} />
      &nbsp;&nbsp;&nbsp;
      <div className="space20"></div>
-     <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={search}><SearchIcon fontSize="large" className="searchButton"/></Button>
+     <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={search}><SearchIcon fontSize="large" className="searchButton"/>文字</Button>
+     &nbsp;&nbsp;&nbsp;
+     <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={searchImg} color="success"><PanoramaIcon fontSize="large" className="searchButton"/> &nbsp;图片</Button>
 
      </form>
         <div className="space40"></div>

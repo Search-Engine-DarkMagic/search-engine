@@ -12,7 +12,7 @@ func RunServer() {
 	r.Use(CORSMiddleware())
 	r.GET("/v1/status", statusCheck)
 	r.POST("/v1/search", searchResult)
-	r.GET("/v1/search", getResult)
+	r.POST("/v1/searchImg", searchResultImg)
 	r.POST("/v1/signup", userSignup)
 	r.POST("/v1/login", userLogin)
 	r.GET("/v1/userinfo", userInfo)
