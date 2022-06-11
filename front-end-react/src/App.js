@@ -8,6 +8,7 @@ import SignupPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
 import History from "./pages/History";
 import Fav from "./pages/Fav";
+import Profile from "./pages/Profile";
 import AddFav from "./pages/AddFav";
 import axios from 'axios';
 
@@ -46,6 +47,7 @@ function App() {
         <Route path="/v1/history" element={<History nickName={nickName}/>} />
         <Route path="/v1/fav" element={<Fav nickName={nickName} email={email}/>} />
         <Route path="/v1/test" element={<AddFav />}/>
+        <Route path="/v1/profile" element={<Profile nickName={nickName} email={email}/>} />
       </Routes>
     </Router>
   );

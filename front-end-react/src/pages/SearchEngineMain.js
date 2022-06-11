@@ -232,7 +232,7 @@ function SearchEngineMain(props) {
       'aria-labelledby': 'basic-button',
     }}
   >
-    <MenuItem onClick={handleClose2}><span>个人信息</span></MenuItem>
+    <MenuItem onClick={handleClose2} component={Link} to="/v1/Profile"><span>个人信息</span></MenuItem>
     <MenuItem onClick={handleClose2} component={Link} to="/v1/history"><span>历史搜索记录</span></MenuItem>
     <MenuItem onClick={logout}><span>退出登录</span></MenuItem>
   </Menu></>

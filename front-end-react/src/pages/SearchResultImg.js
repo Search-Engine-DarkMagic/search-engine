@@ -30,6 +30,7 @@ import InputLabel from '@mui/material/InputLabel';
 import FolderIcon from '@mui/icons-material/Folder';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import Modal from "../pages/Modal";
 import * as Yup from 'yup';
 import PanoramaIcon from '@mui/icons-material/Panorama';
 function SearchResultImg(props) {
@@ -69,7 +70,7 @@ function SearchResultImg(props) {
 
   }));
   const [age, setAge] = React.useState('');
-
+  const [selectedImg, setSelectedImg] = useState(null);
   const searchImgAction = () => {
     navigate('/v1/searchImg/result=' + result + '&filter=' + ignore);
     window.location.reload(false);
@@ -79,6 +80,8 @@ function SearchResultImg(props) {
     setAge(event.target.value);
   };
 
+  const [openImg, setOpenImg] = useState(false);
+  const [largeImg, setLargeImg] = useState(null);
   const [searchImg, setSearchImg] = useState([]);
   const [searchKey, setSearchKey] = useState([]);
   const [searchResult, setSearchResult] = useState([]);
@@ -89,6 +92,16 @@ function SearchResultImg(props) {
   const [openFav2, setOpenFav2] = useState(false);
   let showNewFavName;
   const [newFavName, setNewFavName] = useState('');
+
+
+  const handleOpenImg = (rows) => {
+    setOpenImg(true);
+    setLargeImg(rows);
+  }
+
+  const handleCloseImg = () => {
+    setOpenImg(false);
+  }
 
   const handleFavClickOpen2 = () => {
     setOpenFav2(true);
@@ -330,18 +343,19 @@ console.log(error);
       <>
         <Button color="warning" onClick={() => {searchRelated(rows)}}><span style={{fontSize:"20px"}}>{rows}</span></Button>
       </>
-     
       
     ))
-
     resultImgShowing = searchImg.map((rows) => (
 
+
+      
         <Grid item xs={4}>
           <Item><img 
         src={rows}
         alt="pic"
         width="200px"
         height="200px"
+        onClick={() => handleOpenImg(rows)}
         /></Item>
         </Grid>
         
@@ -647,6 +661,15 @@ console.log(error);
           
         </DialogActions>
       </Dialog>
+
+
+      <Dialog open={openImg} onClose={handleCloseImg}>
+      <img src={largeImg} />
+
+    
+      </Dialog>
+
+
         <div></div>
         <form>
      <TextField className="searchBar" value={result} onChange={e => setResult(e.target.value)} id="outlined-basic" label="搜索" variant="outlined" InputProps={{ style: { fontFamily:"Quicksand", fontWeight:"700"} }} />
@@ -672,15 +695,13 @@ console.log(error);
         <hr style={{width:"50%"}}></hr>
 
         <Box sx={{ width: '100%' }}>
-      <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+      <Grid container Spacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
         {resultImgShowing}
         
       </Grid>
     </Box>
         
      </div>
-
-     
         
      </>
     )
