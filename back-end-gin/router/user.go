@@ -244,7 +244,7 @@ func favFolderCreate(c *gin.Context) {
 	favFolder := model.Fav{
 		Email:  fav.Email,
 		Folder: fav.Folder,
-		Result: "empty",
+		Result: "空",
 	}
 
 	//寻找email对应收藏夹信息
@@ -370,19 +370,6 @@ func deleteFav(c *gin.Context) {
 	//找到用户email+文件夹名称+结果
 	db.Where("email = ? AND folder = ? AND result = ?", test.Email, test.Folder, test.Result).Delete(&test)
 
-	var checkEmpty model.Fav
-	var empty model.Fav
-	db.Where("email = ? AND folder = ? AND result = ?", test.Email, test.Folder, test.Result).Take(&checkEmpty)
-
-	if checkEmpty == empty {
-		favFolder := model.Fav{
-			Email:  test.Email,
-			Folder: test.Folder,
-			Result: "空",
-		}
-
-		db.Create(&favFolder)
-	}
 }
 
 //用户删除收藏夹
