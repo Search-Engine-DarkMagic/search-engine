@@ -1,15 +1,11 @@
-# search-engine
+# search-engine 搜索引擎
 
-
-## This is a search-engine project assigned by ByteDance summer camp 2022
-## 这是一个搜索引擎项目（2022青训营）
+## This is a search-engine project assigned by ByteDance summer camp 2022 这是一个搜索引擎项目（2022青训营）
 
 ## API文档
 
-
-
 - r.GET("/v1/status", statusCheck)								检测服务器网页状态 (status)
--r.POST("/v1/search", searchResult)							搜索文字结果						
+- r.POST("/v1/search", searchResult)							搜索文字结果						
 - r.POST("/v1/searchImg", searchResultImg)						搜索图片结果
 - r.POST("/v1/signup", userSignup)								用户注册
 - r.POST("/v1/login", userLogin)								用户登录
