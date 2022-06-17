@@ -34,7 +34,7 @@ import Modal from "../pages/Modal";
 import * as Yup from 'yup';
 import PanoramaIcon from '@mui/icons-material/Panorama';
 function SearchResultImg(props) {
-
+  const [searchTime, setSearchTime] = useState("");
   const [inputError, setInputError] = useState(false);
   const [dataValue, setDataValue] = useState([]);
   const validate = Yup.object({
@@ -163,11 +163,13 @@ function SearchResultImg(props) {
    if (!response.data.data.result){
      console.log("jesus");
      setSearchResult(['空']);
+     setSearchTime((response.data.data.time / 1000000000).toFixed(3) + "秒");
      
    }else {   
      console.log(response.data.data.url);
      setSearchResult(response.data.data.result);
      setSearchKey(response.data.data.key);
+     setSearchTime((response.data.data.time / 1000000000).toFixed(3) + "秒");
      setSearchImg(response.data.data.url);
  }
 
@@ -678,10 +680,11 @@ console.log(error);
      <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={search}><SearchIcon fontSize="large" className="searchButton"/>文字</Button>
      &nbsp;&nbsp;&nbsp;
      <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={searchImgAction} color="success"><PanoramaIcon fontSize="large" className="searchButton"/> &nbsp;图片</Button>
-
+     <div></div>
+     <span>搜索时间:{searchTime} </span>
     <div style={{marginBottom:"40px"}}></div>
      </form>
-       
+     
        <div>
        <h3>图片相关搜索</h3>
       <div style={{marginTop:"20px"}}></div>

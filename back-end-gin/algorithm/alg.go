@@ -1,23 +1,24 @@
 package Algorithm
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"search/algorithm/index"
 	"sort"
-	"strconv"
 	"strings"
+	"time"
 
 	gt "github.com/bas24/googletranslatefree"
-	"github.com/mozillazg/go-pinyin"
 	"github.com/xuri/excelize/v2"
 	"github.com/yanyiwu/gojieba"
 )
 
 //main包开始
-func Algorithm(result string) ([]string, []string) {
+func Algorithm(result string) ([]string, []string, time.Duration) {
 	//创建一个slice叫words，把分词结果存入words中
 	var words []string
 	//jieba分词
@@ -56,131 +57,97 @@ func Algorithm(result string) ([]string, []string) {
 	searchResultRelated := make(map[string]int)
 	otherRelatedKey := make(map[string]int)
 
+	searchResult := make(map[string]string)
 	//读取excel行和列的数字
-	location1 := "A"
-	location2 := "B"
 
-	count1 := 1
-	count2 := 1
-	count5 := 1
-	count6 := 1
-	location5 := "E"
-	location6 := "F"
+	// count5 := 1
+	// count6 := 1
+	// location5 := "E"
+	// location6 := "F"
 
 	//读取m数据
-	for {
-		location1 += strconv.Itoa(count1)
-		location2 += strconv.Itoa(count2)
-		cell1, err := f.GetCellValue("Sheet1", location1)
-		cell2, err := f.GetCellValue("Sheet1", location2)
-		if cell1 == "" {
-			break
-		}
-
-		m[cell1] = cell2
-
-		location1 = "A"
-		location2 = "B"
-		count1++
-		count2++
-
-		if err != nil {
-
-			break
-		}
-
+	//读取搜索结果+图片
+	jsonFile, err := os.Open("test.json")
+	// if we os.Open returns an error then handle it
+	if err != nil {
+		fmt.Println(err)
 	}
+	fmt.Println("Successfully Opened users.json")
+	// defer the closing of our jsonFile so that we can parse it later on
+	defer jsonFile.Close()
 
-	//读取拼音索引 contextClue
-	for {
-		location5 += strconv.Itoa(count5)
-		location6 += strconv.Itoa(count6)
-		cell5, err := f.GetCellValue("Sheet1", location5)
-		cell6, err := f.GetCellValue("Sheet1", location6)
-		if cell5 == "" {
-			break
-		}
-		contextClue[cell5] = cell6
+	byteValue, _ := ioutil.ReadAll(jsonFile)
 
-		location5 = "E"
-		location6 = "F"
-		count5++
-		count6++
-		if err != nil {
-			break
-		}
+	json.Unmarshal(byteValue, &m)
+
+	//读取n数据
+	//读取搜索结果+图片
+	jsonFile2, err := os.Open("test3.json")
+	// if we os.Open returns an error then handle it
+	if err != nil {
+		fmt.Println(err)
 	}
+	fmt.Println("Successfully Opened users.json")
+	// defer the closing of our jsonFile so that we can parse it later on
+	defer jsonFile2.Close()
+
+	byteValue2, _ := ioutil.ReadAll(jsonFile2)
+
+	json.Unmarshal(byteValue2, &contextClue)
 
 	//搜索关键词
+
+	start := time.Now()
 
 	//中英文一起搜索，用count来计数
 	searchENandCN := 0
 	for {
 
+		jsonFile3, err := os.Open("test2.json")
+		// if we os.Open returns an error then handle it
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Println("Successfully Opened searchKey.json")
+		// defer the closing of our jsonFile so that we can parse it later on
+		defer jsonFile3.Close()
+
+		byteValue, _ := ioutil.ReadAll(jsonFile3)
+
+		json.Unmarshal(byteValue, &searchResult)
+
 		//regex检测搜索结果是否是中文
 		match, _ := regexp.MatchString("[\u4e00-\u9fa5]", result)
 		//如果是：
 		if match {
-			//变成拼音
-			a := pinyin.NewArgs()
-			b := pinyin.Pinyin(result, a)
-			//找到拼音首字母
-			value := b[0][0][0:1]
 
-			s := strings.Split(contextClue[value], " ")
-			//找到拼音开始+结束点，节约搜索时间
-			starting, _ := strconv.Atoi(s[0])
-			ending, _ := strconv.Atoi(s[1])
+			finalResult := searchResult[result]
 
-			locationLimit := "C"
-			locationLimit2 := "D"
+			s := strings.Split(finalResult, " ")
 
-			//开始+结束点
-			for i := starting; i < ending; i++ {
+			for value := range s {
 
-				//每行++
-				locationLimit2 += strconv.Itoa(i)
+				//隔离网址与搜索结果
+				captionIndex := strings.Index(m[s[value]], " ")
+				hello := m[s[value]][captionIndex+1:]
 
-				locationLimit += strconv.Itoa(i)
+				//把搜索结果放到map里面
+				searchResultRelated[m[s[value]]] = strings.Index(hello, result)
 
-				//读取搜索结果
-				cell1, _ := f.GetCellValue("Sheet1", locationLimit)
+				//继续分词，为了相关度搜索
+				words = x.Cut(hello, use_hmm)
 
-				// fmt.Println(cell1)
-				//检测搜索关键词是否出现在搜索结果中
-				if result == cell1[strings.Index(cell1, " ")+1:] {
-
-					finalResult, _ := f.GetCellValue("Sheet1", locationLimit2)
-					//因为每个结果前面都有拼音分词，所以去掉拼音，只读分词
-					s := strings.Split(finalResult, " ")
-
-					for value := range s {
-
-						//隔离网址与搜索结果
-						captionIndex := strings.Index(m[s[value]], " ")
-						hello := m[s[value]][captionIndex+1:]
-
-						//把搜索结果放到map里面
-						searchResultRelated[m[s[value]]] = strings.Index(hello, result)
-
-						//继续分词，为了相关度搜索
-						words = x.Cut(hello, use_hmm)
-
-						//把分好的词放OtherRelatedKey里面
-						for _, value := range words {
-							match, _ := regexp.MatchString("[\u4e00-\u9fa5a-zA-Z]", value)
-							if match && value != result {
-								otherRelatedKey[value]++
-							}
-
-						}
-
+				//把分好的词放OtherRelatedKey里面
+				for _, value := range words {
+					match, _ := regexp.MatchString("[\u4e00-\u9fa5a-zA-Z]", value)
+					if match && value != result {
+						otherRelatedKey[value]++
 					}
+
 				}
 
-				locationLimit = "C"
-				locationLimit2 = "D"
 			}
+
 			//搜完中文，用翻译包翻译成英文继续搜索
 			result, _ = gt.Translate(result, "zh-Hans", "en")
 
@@ -190,52 +157,84 @@ func Algorithm(result string) ([]string, []string) {
 
 			//检测结果如果是英文：（大致流程同上）
 
-			value := result[0:1]
-			value = strings.ToLower(value)
-			// fmt.Println("value is ", value)
-			s := strings.Split(contextClue[value], " ")
+			// value := result[0:1]
+			// value = strings.ToLower(value)
+			// // fmt.Println("value is ", value)
+			// s := strings.Split(contextClue[value], " ")
 
-			starting, _ := strconv.Atoi(s[0])
-			ending, _ := strconv.Atoi(s[1])
+			// starting, _ := strconv.Atoi(s[0])
+			// ending, _ := strconv.Atoi(s[1])
 
-			locationLimit := "C"
-			locationLimit2 := "D"
+			// locationLimit := "C"
+			// locationLimit2 := "D"
 
-			for i := starting; i < ending; i++ {
+			// for i := starting; i < ending; i++ {
 
-				locationLimit2 += strconv.Itoa(i)
+			// 	locationLimit2 += strconv.Itoa(i)
 
-				locationLimit += strconv.Itoa(i)
+			// 	locationLimit += strconv.Itoa(i)
 
-				cell1, _ := f.GetCellValue("Sheet1", locationLimit)
+			// 	cell1, _ := f.GetCellValue("Sheet1", locationLimit)
 
-				if result == cell1[strings.Index(cell1, " ")+1:] {
+			// 	if result == cell1[strings.Index(cell1, " ")+1:] {
 
-					finalResult, _ := f.GetCellValue("Sheet1", locationLimit2)
-					s := strings.Split(finalResult, " ")
+			// 		finalResult, _ := f.GetCellValue("Sheet1", locationLimit2)
+			// 		s := strings.Split(finalResult, " ")
 
-					for value := range s {
+			// 		for value := range s {
 
-						searchResultRelated[m[s[value]]] = strings.Index(m[s[value]], result)
+			// 			searchResultRelated[m[s[value]]] = strings.Index(m[s[value]], result)
 
-						words = x.Cut(m[s[value]], use_hmm)
+			// 			words = x.Cut(m[s[value]], use_hmm)
 
-						for _, value := range words {
+			// 			for _, value := range words {
 
-							match, _ := regexp.MatchString("[\u4e00-\u9fa5a-zA-Z]{2,10}", value)
-							if match && value != result {
-								otherRelatedKey[value]++
-							}
+			// 				match, _ := regexp.MatchString("[\u4e00-\u9fa5a-zA-Z]{2,10}", value)
+			// 				if match && value != result {
+			// 					otherRelatedKey[value]++
+			// 				}
 
+			// 			}
+
+			// 		}
+			// 	}
+
+			// 	locationLimit = "C"
+			// 	locationLimit2 = "D"
+
+			// }
+
+			//分割线===================================
+
+			if _, ok := searchResult[result]; ok {
+				finalResult := searchResult[result]
+
+				s := strings.Split(finalResult, " ")
+
+				for value := range s {
+
+					//隔离网址与搜索结果
+					captionIndex := strings.Index(m[s[value]], " ")
+					hello := m[s[value]][captionIndex+1:]
+
+					//把搜索结果放到map里面
+					searchResultRelated[m[s[value]]] = strings.Index(hello, result)
+
+					//继续分词，为了相关度搜索
+					words = x.Cut(hello, use_hmm)
+
+					//把分好的词放OtherRelatedKey里面
+					for _, value := range words {
+						match, _ := regexp.MatchString("[\u4e00-\u9fa5a-zA-Z]", value)
+						if match && value != result {
+							otherRelatedKey[value]++
 						}
 
 					}
+
 				}
-
-				locationLimit = "C"
-				locationLimit2 = "D"
-
 			}
+
 			result, _ = gt.Translate(result, "en", "zh-Hans")
 
 			searchENandCN++
@@ -248,10 +247,13 @@ func Algorithm(result string) ([]string, []string) {
 
 	}
 
+	duration := time.Since(start)
+
+	fmt.Println("the time it takes to run is: ", duration)
+
 	//返回结果放在slice里
 	var returnResult []string
 	var returnKeyWord []string
-
 	//关联度排序排序（关键词出现在搜索结果的位置，数字越小越提前）
 
 	keys := make([]string, 0, len(searchResultRelated))
@@ -290,7 +292,7 @@ func Algorithm(result string) ([]string, []string) {
 		// fmt.Println(k, otherRelatedKey[k])
 		for _, v := range stopWords {
 			if v == k {
-				fmt.Println(v)
+				// fmt.Println(v)
 				option = 1
 				break
 			}
@@ -304,5 +306,13 @@ func Algorithm(result string) ([]string, []string) {
 		keyCount++
 	}
 
-	return returnResult, returnKeyWord
+	return returnResult, returnKeyWord, duration
+}
+
+func fmtDuration(d time.Duration) string {
+	d = d.Round(time.Minute)
+	h := d / time.Hour
+	d -= h * time.Hour
+	m := d / time.Minute
+	return fmt.Sprintf("%02d:%02d", h, m)
 }

@@ -34,12 +34,12 @@ func searchResult(c *gin.Context) {
 
 	//运行搜索算法
 
-	a, b := Algorithm.Algorithm(result)
+	a, b, d := Algorithm.Algorithm(result)
 
 	//后端打印出来
-	fmt.Println("Brob")
-	fmt.Println(a)
-	fmt.Println(b)
+	// fmt.Println("Brob")
+	// fmt.Println(a)
+	// fmt.Println(b)
 	var userEmail model.UserEmail
 	//接受用户email来添加历史记录
 	err2 := c.ShouldBindJSON(&userEmail)
@@ -75,25 +75,30 @@ func searchResult(c *gin.Context) {
 	var resultSorted []string
 	var urlSorted []string
 	fmt.Println(filter)
-	for _, value := range a {
-		captionIndex := strings.Index(value, " ")
-		caption := value[captionIndex+1:]
-		caption2 := value[0:captionIndex]
 
-		if strings.Contains(caption, filter) && filter != "" {
+	if len(a) != 1 {
+		for _, value := range a {
 
-		} else {
-			resultSorted = append(resultSorted, caption)
-			urlSorted = append(urlSorted, caption2)
+			captionIndex := strings.Index(value, " ")
+			caption := value[captionIndex+1:]
+			caption2 := value[0:captionIndex]
+
+			if strings.Contains(caption, filter) && filter != "" {
+
+			} else {
+				resultSorted = append(resultSorted, caption)
+				urlSorted = append(urlSorted, caption2)
+			}
+
 		}
-
 	}
 
 	//返回前端
 	totalResult := model.SearchResult{
-		Result:  resultSorted,
-		URL:     urlSorted,
-		Keyword: b,
+		Result:     resultSorted,
+		URL:        urlSorted,
+		Keyword:    b,
+		SearchTime: d,
 	}
 	c.JSON(http.StatusOK, gin.H{"data": totalResult})
 
@@ -122,7 +127,7 @@ func searchResultImg(c *gin.Context) {
 
 	//运行搜索算法
 
-	a, b := Algorithm.Algorithm(result)
+	a, b, d := Algorithm.Algorithm(result)
 
 	//后端打印出来
 	fmt.Println("Brob")
@@ -179,9 +184,10 @@ func searchResultImg(c *gin.Context) {
 
 	//返回前端
 	totalResult := model.SearchResult{
-		Result:  resultSorted,
-		URL:     urlSorted,
-		Keyword: b,
+		Result:     resultSorted,
+		URL:        urlSorted,
+		Keyword:    b,
+		SearchTime: d,
 	}
 	c.JSON(http.StatusOK, gin.H{"data": totalResult})
 

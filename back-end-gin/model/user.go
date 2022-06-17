@@ -1,5 +1,7 @@
 package model
 
+import "time"
+
 //定义object对象
 
 //user登录信息+昵称
@@ -37,7 +39,8 @@ type RenameFolder struct {
 }
 
 type SearchResult struct {
-	Result  []string `json:"result"`
-	URL     []string `json:"url"`
-	Keyword []string `json:"key"`
+	Result     []string      `json:"result"`
+	URL        []string      `json:"url"`
+	Keyword    []string      `json:"key"`
+	SearchTime time.Duration `json:"time"`
 }

@@ -3,7 +3,9 @@ package index
 //import所需要的包
 import (
 	"encoding/csv"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
@@ -11,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mozillazg/go-pinyin"
 	"github.com/xuri/excelize/v2"
 	"github.com/yanyiwu/gojieba"
 )
@@ -64,7 +65,7 @@ func Index() {
 	m := make(map[int]string)
 	n := make(map[string]string)
 	sorted := make(map[string]string)
-
+	pinyinMap := make(map[string]string)
 	//找分词在哪篇ID中出现过
 
 	//count是给每个搜索结果编号
@@ -85,10 +86,9 @@ func Index() {
 			match, _ := regexp.MatchString("[\u4e00-\u9fa5]", value)
 			//把中文分词结果变成拼音，首字母放到前面（方便后期拼音搜索）；英文直接放入就好了
 			if match {
-				a := pinyin.NewArgs()
-				b := pinyin.Pinyin(value, a)
+
 				//把首字母放在中文分词前面
-				value = b[0][0] + " " + value
+
 			}
 
 			//检测map中是否有相同的key，如果没有（第一次），那就把页码（count）写上；如果出现1+次，那就加上之前的页码
@@ -105,6 +105,8 @@ func Index() {
 		//页码++
 		count++
 	}
+
+	mapSerial(m, "test.json")
 
 	//排序 (n)（因为map是混乱的，所以需要排序，从a-z, 1-9）
 	keys := make([]string, 0, len(n))
@@ -154,6 +156,7 @@ func Index() {
 			fmt.Println(difference)
 			y.SetCellValue("Sheet1", excelCol6, ranger)
 
+			pinyinMap[firstChar] = ranger
 			firstChar = k[0:1]
 			difference = 0
 		}
@@ -190,4 +193,35 @@ func Index() {
 		fmt.Println(err)
 	}
 
+	mapSerialString(n, "test2.json")
+	mapSerialString(pinyinMap, "test3.json")
+}
+
+// 封装 map 序列化测试函数
+func mapSerial(m map[int]string, name string) {
+
+	// 将 map 使用 Marshal() 函数进行序列化
+	data, err := json.Marshal(m) // map本身为引用。
+	if err != nil {
+		fmt.Println("Marshal err:", err)
+		return
+	}
+	// 查看序列化后的 json 字符串
+	fmt.Println("map序列化后 = ", string(data))
+
+	_ = ioutil.WriteFile(name, data, 0644)
+}
+
+func mapSerialString(m map[string]string, name string) {
+
+	// 将 map 使用 Marshal() 函数进行序列化
+	data, err := json.Marshal(m) // map本身为引用。
+	if err != nil {
+		fmt.Println("Marshal err:", err)
+		return
+	}
+	// 查看序列化后的 json 字符串
+	fmt.Println("map序列化后 = ", string(data))
+
+	_ = ioutil.WriteFile(name, data, 0644)
 }

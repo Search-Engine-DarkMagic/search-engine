@@ -38,6 +38,7 @@ function SearchResult(props) {
     navigate('/v1/searchImg/result=' + result + '&filter=' + ignore);
   }
 
+  const [searchTime, setSearchTime] = useState("");
   const [inputError, setInputError] = useState(false);
   const [dataValue, setDataValue] = useState([]);
   const validate = Yup.object({
@@ -151,6 +152,8 @@ function SearchResult(props) {
    }else {   
      console.log(response.data.data.result);
      console.log(response.data.data.key);
+
+     setSearchTime((response.data.data.time / 1000000000).toFixed(3) + "秒");
      setSearchResult(response.data.data.result);
      setSearchKey(response.data.data.key);
  }
@@ -202,7 +205,7 @@ data: {
 console.log(error);
 }), 1000);
      
- }, [email],[searchResult],[searchKey]);
+ }, [email],[searchResult],[searchKey],[searchTime]);
 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [resultWantToSave, setResultWantToSave] = useState('');
@@ -601,7 +604,8 @@ console.log(error);
      <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={search}><SearchIcon fontSize="large" className="searchButton"/>文字</Button>
      &nbsp;&nbsp;&nbsp;
      <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={searchImgAction} color="success"><PanoramaIcon fontSize="large" className="searchButton"/> &nbsp;图片</Button>
-
+<div></div>
+<span>搜索时间:{searchTime} </span>
     <div style={{marginBottom:"40px"}}></div>
      </form>
        
