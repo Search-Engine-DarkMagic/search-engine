@@ -113,3 +113,5 @@ h3 {
   text-align: left;
 }
 
+
+.MuiPagination-ul { justify-content: center; }

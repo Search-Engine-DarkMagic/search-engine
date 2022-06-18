@@ -31,6 +31,10 @@ import FolderIcon from '@mui/icons-material/Folder';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Modal from "../pages/Modal";
+import Pagination from '@mui/material/Pagination';
+
+import Container from "@mui/material/Container";
+import List from "@mui/material/List";
 import * as Yup from 'yup';
 import PanoramaIcon from '@mui/icons-material/Panorama';
 function SearchResultImg(props) {
@@ -87,7 +91,8 @@ function SearchResultImg(props) {
   const [searchResult, setSearchResult] = useState([]);
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-
+  const [page, setPage] = useState(1);
+  const [checked, setChecked] = useState([]);
   const [openFav, setOpenFav] = useState(false);
   const [openFav2, setOpenFav2] = useState(false);
   let showNewFavName;
@@ -348,9 +353,6 @@ console.log(error);
       
     ))
     resultImgShowing = searchImg.map((rows) => (
-
-
-      
         <Grid item xs={4}>
           <Item><img 
         src={rows}
@@ -547,6 +549,26 @@ console.log(error);
         }
       })
       }
+
+
+
+      const count = Math.ceil(searchImg.length / 30);
+      const handlePageChange = (event, value) => {
+        setPage(paginator(searchImg, value, 30).page);
+      };
+      const handleOnChange = (e, index) => {
+        let prev = checked;
+        let itemIndex = prev.indexOf(index);
+        if (itemIndex !== -1) {
+          prev.splice(itemIndex, 1);
+        } else {
+          prev.push(index);
+        }
+        setChecked([...prev]);
+      };
+      console.log(checked);
+    
+
     return (
         <>
         
@@ -671,7 +693,6 @@ console.log(error);
     
       </Dialog>
 
-
         <div></div>
         <form>
      <TextField className="searchBar" value={result} onChange={e => setResult(e.target.value)} id="outlined-basic" label="搜索" variant="outlined" InputProps={{ style: { fontFamily:"Quicksand", fontWeight:"700"} }} />
@@ -699,15 +720,77 @@ console.log(error);
 
         <Box sx={{ width: '100%' }}>
       <Grid container Spacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-        {resultImgShowing}
+        {/* {resultImgShowing} */}
         
       </Grid>
     </Box>
         
      </div>
         
+
+     <Container>
+
+    
+    
+
+    
+        {paginator(searchImg, page, 30).data.map((value, index) => {
+          return (
+<>
+
+     <span>
+        <img 
+        src={value}
+        alt="pic"
+        width="200px"
+        height="200px"
+        onClick={() => handleOpenImg(value)}
+        style={{margin:"25px"}}
+        />
+        </span> 
+
+      </>
+          );
+        })}
+     
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <Pagination
+          count={count}
+          page={page}
+          onChange={handlePageChange}
+          color="primary"
+        />
+      </div>
+
+
+  </Container>
+
+  <div className="space40" />
+
      </>
     )
 }
+
+
+
+function paginator(items, current_page, per_page_items) {
+  let page = current_page || 1,
+    per_page = per_page_items,
+    offset = (page - 1) * per_page,
+    paginatedItems = items.slice(offset).slice(0, per_page_items),
+    total_pages = Math.ceil(items.length / per_page);
+  console.log("Anzahl: " + items.lgenth);
+
+  return {
+    page: page,
+    per_page: per_page,
+    pre_page: page - 1 ? page - 1 : null,
+    next_page: total_pages > page ? page + 1 : null,
+    total: items.length,
+    total_pages: total_pages,
+    data: paginatedItems
+  };
+}
+
 
 export default SearchResultImg;

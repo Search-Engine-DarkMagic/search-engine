@@ -32,8 +32,56 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import * as Yup from 'yup';
 import PanoramaIcon from '@mui/icons-material/Panorama';
+import Pagination from '@mui/material/Pagination';
+
+import Container from "@mui/material/Container";
+import List from "@mui/material/List";
+
 function SearchResult(props) {
 
+
+
+  const carrierDetails = [
+    {
+      About: "Voralberg"
+    },
+  
+    {
+      About: "Tirol"
+    },
+  
+    {
+      About: "Salzburg "
+    },
+    {
+      About: "Oberösterreich"
+    },
+  
+    {
+      About: "Niederösterreich"
+    },
+  
+    {
+      About: "Wien "
+    },
+    {
+      About: "Burgenland"
+    },
+  
+    {
+      About: "Steiermark"
+    },
+  
+    {
+      About: "Kärnten "
+    }
+  ];
+
+  
+
+
+
+  
   const searchImgAction = () => {
     navigate('/v1/searchImg/result=' + result + '&filter=' + ignore);
   }
@@ -41,6 +89,9 @@ function SearchResult(props) {
   const [searchTime, setSearchTime] = useState("");
   const [inputError, setInputError] = useState(false);
   const [dataValue, setDataValue] = useState([]);
+  const [page, setPage] = useState(1);
+  const [checked, setChecked] = useState([]);
+ 
   const validate = Yup.object({
     folder: Yup.string()
     .required('必填'),
@@ -480,6 +531,29 @@ console.log(error);
         }
       })
       }
+
+      console.log(carrierDetails)
+
+
+    
+      const count = Math.ceil(searchResult.length / 10);
+      const handlePageChange = (event, value) => {
+        setPage(paginator(searchResult, value, 10).page);
+      };
+      const handleOnChange = (e, index) => {
+        let prev = checked;
+        let itemIndex = prev.indexOf(index);
+        if (itemIndex !== -1) {
+          prev.splice(itemIndex, 1);
+        } else {
+          prev.push(index);
+        }
+        setChecked([...prev]);
+      };
+      console.log(checked);
+    
+
+
     return (
         <>
         
@@ -622,13 +696,91 @@ console.log(error);
         <hr style={{width:"50%"}}></hr>
 
 
-        {resultShowing}
+        {/* {resultShowing} */}
+        
      </div>
 
-     
-        
+    <Container>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column"
+      }}
+    >
+      <List
+        sx={{
+          width: "100%",
+          maxWidth: "100rem",
+          bgcolor: "background.paper"
+        }}
+      >
+        {paginator(searchResult, page, 10).data.map((value, index) => {
+          return (
+  
+
+<>
+      <div className="boxbox" key={value.id}>
+
+      <Box sx={{ flexGrow: 1 }}>
+    <Grid container spacing={2}>
+      <Grid item xs={8}>
+        <Item><span style={{marginTop:'30px'}}>{value}</span></Item>
+      </Grid>
+      <Grid item xs={3}>
+        <Item><Button onClick={() => {handleFavClickOpen(value);}}><span style={{fontWeight:"700"}}>添加收藏夹</span><StarIcon style={{color:"#F1C40F"}}/></Button></Item>
+      </Grid>
+    </Grid>
+  </Box>
+      </div>
+      </>
+
+
+          );
+        })}
+      </List>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <Pagination
+          count={count}
+          page={page}
+          onChange={handlePageChange}
+          color="primary"
+        />
+      </div>
+    </div>
+  </Container>
+
+<div className="space40" />
+
+
+    
      </>
     )
 }
 
+
+function paginator(items, current_page, per_page_items) {
+  let page = current_page || 1,
+    per_page = per_page_items,
+    offset = (page - 1) * per_page,
+    paginatedItems = items.slice(offset).slice(0, per_page_items),
+    total_pages = Math.ceil(items.length / per_page);
+  console.log("Anzahl: " + items.lgenth);
+
+  return {
+    page: page,
+    per_page: per_page,
+    pre_page: page - 1 ? page - 1 : null,
+    next_page: total_pages > page ? page + 1 : null,
+    total: items.length,
+    total_pages: total_pages,
+    data: paginatedItems
+  };
+}
+
+
 export default SearchResult;
+
+
+
+
+  
