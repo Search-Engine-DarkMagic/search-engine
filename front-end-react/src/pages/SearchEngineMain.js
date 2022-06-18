@@ -333,7 +333,7 @@ function SearchEngineMain(props) {
      <TextField className="searchBar" onChange={e => setResult(e.target.value)} id="outlined-basic" label="搜索" variant="outlined" InputProps={{ style: { fontFamily:"Quicksand", fontWeight:"700"} }} />
      &nbsp;&nbsp;&nbsp;
      <div className="space20"></div>
-     <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={search}><SearchIcon fontSize="large" className="searchButton"/>文字</Button>
+     <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={search} type="submit"><SearchIcon fontSize="large" className="searchButton"/>文字</Button>
      &nbsp;&nbsp;&nbsp;
      <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={searchImg} color="success"><PanoramaIcon fontSize="large" className="searchButton"/> &nbsp;图片</Button>
 

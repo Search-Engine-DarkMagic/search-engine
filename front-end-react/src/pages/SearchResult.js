@@ -38,49 +38,6 @@ import Container from "@mui/material/Container";
 import List from "@mui/material/List";
 
 function SearchResult(props) {
-
-
-
-  const carrierDetails = [
-    {
-      About: "Voralberg"
-    },
-  
-    {
-      About: "Tirol"
-    },
-  
-    {
-      About: "Salzburg "
-    },
-    {
-      About: "Oberösterreich"
-    },
-  
-    {
-      About: "Niederösterreich"
-    },
-  
-    {
-      About: "Wien "
-    },
-    {
-      About: "Burgenland"
-    },
-  
-    {
-      About: "Steiermark"
-    },
-  
-    {
-      About: "Kärnten "
-    }
-  ];
-
-  
-
-
-
   
   const searchImgAction = () => {
     navigate('/v1/searchImg/result=' + result + '&filter=' + ignore);
@@ -199,7 +156,7 @@ function SearchResult(props) {
    if (!response.data.data.result){
      console.log("jesus");
      setSearchResult(['空']);
-     
+     setSearchTime((response.data.data.time / 1000000000).toFixed(3) + "秒");
    }else {   
      console.log(response.data.data.result);
      console.log(response.data.data.key);
@@ -329,6 +286,24 @@ console.log(error);
         
       }
 
+
+    
+      const count = Math.ceil(searchResult.length / 10);
+      const handlePageChange = (event, value) => {
+        setPage(paginator(searchResult, value, 10).page);
+      };
+      const handleOnChange = (e, index) => {
+        let prev = checked;
+        let itemIndex = prev.indexOf(index);
+        if (itemIndex !== -1) {
+          prev.splice(itemIndex, 1);
+        } else {
+          prev.push(index);
+        }
+        setChecked([...prev]);
+      };
+      console.log(checked);
+
   if (ignore !== ''){
     showIgnore = <span>当前过滤关键字：{ignore}</span>
   }else{
@@ -348,23 +323,54 @@ console.log(error);
       
     ))
     
-    resultShowing = searchResult.map((rows)=> (
-      <>
-      <div className="boxbox" key={rows.id}>
+    resultShowing = <Container>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column"
+      }}
+    >
+      <List
+        sx={{
+          width: "100%",
+          maxWidth: "100rem",
+          bgcolor: "background.paper"
+        }}
+      >
+        {paginator(searchResult, page, 10).data.map((value, index) => {
+          return (
+  
+
+<>
+      <div className="boxbox" key={value.id}>
 
       <Box sx={{ flexGrow: 1 }}>
     <Grid container spacing={2}>
       <Grid item xs={8}>
-        <Item><span style={{marginTop:'30px'}}>{rows}</span></Item>
+        <Item><span style={{marginTop:'30px'}}>{value}</span></Item>
       </Grid>
-      <Grid item xs={2}>
-        <Item><Button onClick={() => {handleFavClickOpen(rows);}}><span style={{fontWeight:"700"}}>添加收藏夹</span><StarIcon style={{color:"#F1C40F"}}/></Button></Item>
+      <Grid item xs={3}>
+        <Item><Button onClick={() => {handleFavClickOpen(value);}}><span style={{fontWeight:"700"}}>添加收藏夹</span><StarIcon style={{color:"#F1C40F"}}/></Button></Item>
       </Grid>
     </Grid>
   </Box>
       </div>
       </>
-   ))
+
+
+          );
+        })}
+      </List>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <Pagination
+          count={count}
+          page={page}
+          onChange={handlePageChange}
+          color="primary"
+        />
+      </div>
+    </div>
+  </Container>
   }
 
 
@@ -532,25 +538,9 @@ console.log(error);
       })
       }
 
-      console.log(carrierDetails)
 
 
-    
-      const count = Math.ceil(searchResult.length / 10);
-      const handlePageChange = (event, value) => {
-        setPage(paginator(searchResult, value, 10).page);
-      };
-      const handleOnChange = (e, index) => {
-        let prev = checked;
-        let itemIndex = prev.indexOf(index);
-        if (itemIndex !== -1) {
-          prev.splice(itemIndex, 1);
-        } else {
-          prev.push(index);
-        }
-        setChecked([...prev]);
-      };
-      console.log(checked);
+
     
 
 
@@ -675,7 +665,7 @@ console.log(error);
      <TextField className="searchBar" value={result} onChange={e => setResult(e.target.value)} id="outlined-basic" label="搜索" variant="outlined" InputProps={{ style: { fontFamily:"Quicksand", fontWeight:"700"} }} />
      &nbsp;&nbsp;&nbsp;
   
-     <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={search}><SearchIcon fontSize="large" className="searchButton"/>文字</Button>
+     <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={search} type="submit"><SearchIcon fontSize="large" className="searchButton" />文字</Button>
      &nbsp;&nbsp;&nbsp;
      <Button variant="contained" size="large" style={{minWidth: '50px', minHeight: '55px'}} onClick={searchImgAction} color="success"><PanoramaIcon fontSize="large" className="searchButton"/> &nbsp;图片</Button>
 <div></div>
@@ -696,58 +686,11 @@ console.log(error);
         <hr style={{width:"50%"}}></hr>
 
 
-        {/* {resultShowing} */}
+        {resultShowing}
         
      </div>
 
-    <Container>
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column"
-      }}
-    >
-      <List
-        sx={{
-          width: "100%",
-          maxWidth: "100rem",
-          bgcolor: "background.paper"
-        }}
-      >
-        {paginator(searchResult, page, 10).data.map((value, index) => {
-          return (
-  
-
-<>
-      <div className="boxbox" key={value.id}>
-
-      <Box sx={{ flexGrow: 1 }}>
-    <Grid container spacing={2}>
-      <Grid item xs={8}>
-        <Item><span style={{marginTop:'30px'}}>{value}</span></Item>
-      </Grid>
-      <Grid item xs={3}>
-        <Item><Button onClick={() => {handleFavClickOpen(value);}}><span style={{fontWeight:"700"}}>添加收藏夹</span><StarIcon style={{color:"#F1C40F"}}/></Button></Item>
-      </Grid>
-    </Grid>
-  </Box>
-      </div>
-      </>
-
-
-          );
-        })}
-      </List>
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <Pagination
-          count={count}
-          page={page}
-          onChange={handlePageChange}
-          color="primary"
-        />
-      </div>
-    </div>
-  </Container>
+    
 
 <div className="space40" />
 

@@ -272,6 +272,22 @@ console.log(error);
       setResultWantToSave(fav);
     }
 
+    const count = Math.ceil(searchImg.length / 30);
+    const handlePageChange = (event, value) => {
+      setPage(paginator(searchImg, value, 30).page);
+    };
+    const handleOnChange = (e, index) => {
+      let prev = checked;
+      let itemIndex = prev.indexOf(index);
+      if (itemIndex !== -1) {
+        prev.splice(itemIndex, 1);
+      } else {
+        prev.push(index);
+      }
+      setChecked([...prev]);
+    };
+    console.log(checked);
+  
     const handleClickOpen = () => {
         setOpen(true);
       };
@@ -352,18 +368,36 @@ console.log(error);
       </>
       
     ))
-    resultImgShowing = searchImg.map((rows) => (
-        <Grid item xs={4}>
-          <Item><img 
-        src={rows}
-        alt="pic"
-        width="200px"
-        height="200px"
-        onClick={() => handleOpenImg(rows)}
-        /></Item>
-        </Grid>
-        
-    ))
+    resultImgShowing =      <Container>
+    {paginator(searchImg, page, 30).data.map((value, index) => {
+      return (
+<>
+
+ <span>
+    <img 
+    src={value}
+    alt="pic"
+    width="200px"
+    height="200px"
+    onClick={() => handleOpenImg(value)}
+    style={{margin:"25px"}}
+    />
+    </span> 
+
+  </>
+      );
+    })}
+
+  <div style={{ display: "flex", justifyContent: "center" }}>
+    <Pagination
+      count={count}
+      page={page}
+      onChange={handlePageChange}
+      color="primary"
+    />
+  </div>
+
+</Container>
     
     resultShowing = searchResult.map((rows)=> (
       <>
@@ -552,22 +586,6 @@ console.log(error);
 
 
 
-      const count = Math.ceil(searchImg.length / 30);
-      const handlePageChange = (event, value) => {
-        setPage(paginator(searchImg, value, 30).page);
-      };
-      const handleOnChange = (e, index) => {
-        let prev = checked;
-        let itemIndex = prev.indexOf(index);
-        if (itemIndex !== -1) {
-          prev.splice(itemIndex, 1);
-        } else {
-          prev.push(index);
-        }
-        setChecked([...prev]);
-      };
-      console.log(checked);
-    
 
     return (
         <>
@@ -720,58 +738,22 @@ console.log(error);
 
         <Box sx={{ width: '100%' }}>
       <Grid container Spacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-        {/* {resultImgShowing} */}
-        
+
+        {resultImgShowing}
+       
       </Grid>
     </Box>
-        
+    {resultShowing}
      </div>
         
 
-     <Container>
 
-    
-    
-
-    
-        {paginator(searchImg, page, 30).data.map((value, index) => {
-          return (
-<>
-
-     <span>
-        <img 
-        src={value}
-        alt="pic"
-        width="200px"
-        height="200px"
-        onClick={() => handleOpenImg(value)}
-        style={{margin:"25px"}}
-        />
-        </span> 
-
-      </>
-          );
-        })}
-     
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <Pagination
-          count={count}
-          page={page}
-          onChange={handlePageChange}
-          color="primary"
-        />
-      </div>
-
-
-  </Container>
 
   <div className="space40" />
 
      </>
     )
 }
-
-
 
 function paginator(items, current_page, per_page_items) {
   let page = current_page || 1,

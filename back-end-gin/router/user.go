@@ -343,12 +343,12 @@ func addFav(c *gin.Context) {
 	c.BindJSON(&test)
 
 	var findEmptyFav model.Fav
-	db.Where("email = ? AND folder = ? AND result = ?", test.Email, test.Folder, "empty").Take(&findEmptyFav)
+	db.Where("email = ? AND folder = ? AND result = ?", test.Email, test.Folder, "空").Take(&findEmptyFav)
 
 	var empty model.Fav
 
 	if findEmptyFav != empty {
-		db.Where("email = ? AND folder = ? AND result = ?", test.Email, test.Folder, "empty").Delete(&findEmptyFav)
+		db.Where("email = ? AND folder = ? AND result = ?", test.Email, test.Folder, "空").Delete(&findEmptyFav)
 	}
 	//创建
 	db.Create(&test)
@@ -370,6 +370,18 @@ func deleteFav(c *gin.Context) {
 	//找到用户email+文件夹名称+结果
 	db.Where("email = ? AND folder = ? AND result = ?", test.Email, test.Folder, test.Result).Delete(&test)
 
+	var checkEmpty model.Fav
+	db.First(&checkEmpty)
+	var empty model.Fav
+
+	addEmpty := model.Fav{
+		Email:  test.Email,
+		Folder: test.Folder,
+		Result: "空",
+	}
+	if checkEmpty == empty {
+		db.Create(&addEmpty)
+	}
 }
 
 //用户删除收藏夹

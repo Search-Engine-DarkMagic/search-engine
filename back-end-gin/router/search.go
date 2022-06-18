@@ -168,16 +168,20 @@ func searchResultImg(c *gin.Context) {
 	var resultSorted []string
 	var urlSorted []string
 	fmt.Println(filter)
-	for _, value := range a {
-		captionIndex := strings.Index(value, " ")
-		caption := value[captionIndex+1:]
-		caption2 := value[0:captionIndex]
 
-		if strings.Contains(caption, filter) && filter != "" {
+	if len(a) != 1 {
+		for _, value := range a {
+			captionIndex := strings.Index(value, " ")
+			caption := value[captionIndex+1:]
+			caption2 := value[0:captionIndex]
 
-		} else {
-			resultSorted = append(resultSorted, caption)
-			urlSorted = append(urlSorted, caption2)
+			if strings.Contains(caption, filter) && filter != "" {
+
+			} else {
+				resultSorted = append(resultSorted, caption)
+				urlSorted = append(urlSorted, caption2)
+			}
+
 		}
 
 	}
